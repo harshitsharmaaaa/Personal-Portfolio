@@ -1,181 +1,223 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type FileKey = "about.tsx" | "projects/crypt.ts" | "projects/solana-notes.ts" | "projects/ai-saas.ts" | "skills.json" | "education.md" | "contact.tsx";
 type FolderKey = "portfolio" | "projects";
+type Activity = "explorer" | "search" | "source" | "extensions";
+type Theme = "dark" | "light";
 
-const files: { key: FileKey; label: string; icon: string; mode: string; folder?: FolderKey }[] = [
-  { key: "about.tsx", label: "about.tsx", icon: "⚛", mode: "TypeScript React", folder: "portfolio" },
-  { key: "projects/crypt.ts", label: "crypt.ts", icon: "TS", mode: "TypeScript", folder: "projects" },
-  { key: "projects/solana-notes.ts", label: "solana-notes.ts", icon: "TS", mode: "TypeScript", folder: "projects" },
-  { key: "projects/ai-saas.ts", label: "ai-saas.ts", icon: "TS", mode: "TypeScript", folder: "projects" },
-  { key: "skills.json", label: "skills.json", icon: "{}", mode: "JSON", folder: "portfolio" },
-  { key: "education.md", label: "education.md", icon: "MD", mode: "Markdown", folder: "portfolio" },
-  { key: "contact.tsx", label: "contact.tsx", icon: "⚛", mode: "TypeScript React", folder: "portfolio" },
-];
+type Project = {
+  title: string;
+  stack: string[];
+  description: string;
+  highlights: string[];
+  demo: string;
+  github: string;
+};
 
-const terminalScript = [
-  "$ pnpm dev --portfolio",
-  "ready - started server on localhost:3000",
-  "$ whoami",
-  "Harshit Sharma",
-  "$ cat ./contact.tsx",
-  "email: harshit.sharma270905@gmail.com",
-  "location: Chennai, India",
-  "$ git status --short",
-  "M projects/crypt.ts  M skills.json  ✓ available for internships / projects",
-];
+const STORAGE_KEY = "harshit-vscode-state-v2";
 
-const projectData = {
+const fileMeta: Record<FileKey, { label: string; icon: string; mode: string; folder: FolderKey; color: string }> = {
+  "about.tsx": { label: "about.tsx", icon: "⚛", mode: "TypeScript React", folder: "portfolio", color: "text-[#61dafb]" },
+  "projects/crypt.ts": { label: "crypt.ts", icon: "TS", mode: "TypeScript", folder: "projects", color: "text-[#3178c6]" },
+  "projects/solana-notes.ts": { label: "solana-notes.ts", icon: "TS", mode: "TypeScript", folder: "projects", color: "text-[#3178c6]" },
+  "projects/ai-saas.ts": { label: "ai-saas.ts", icon: "TS", mode: "TypeScript", folder: "projects", color: "text-[#3178c6]" },
+  "skills.json": { label: "skills.json", icon: "{}", mode: "JSON", folder: "portfolio", color: "text-[#f1c40f]" },
+  "education.md": { label: "education.md", icon: "MD", mode: "Markdown", folder: "portfolio", color: "text-[#519aba]" },
+  "contact.tsx": { label: "contact.tsx", icon: "⚛", mode: "TypeScript React", folder: "portfolio", color: "text-[#61dafb]" },
+};
+
+const allFiles = Object.keys(fileMeta) as FileKey[];
+
+const projects: Record<Extract<FileKey, `projects/${string}`>, Project> = {
   "projects/crypt.ts": {
     title: "Crypt",
     stack: ["Next.js", "TypeScript", "ethers.js", "@solana/web3.js", "BIP39", "BIP44"],
-    description: "A privacy-first multi-chain HD wallet generator and blockchain explorer for Ethereum and Solana.",
-    bullets: ["client-side key generation", "12/24 word mnemonic validation", "automatic RPC failover", "private keys never leave browser"],
+    description: "Privacy-first multi-chain HD wallet generator and blockchain explorer for Ethereum and Solana.",
+    highlights: ["Client-side key generation", "12/24 word mnemonic validation", "RPC failover", "Private keys never leave browser"],
     demo: "https://demo.example.com/crypt",
     github: "https://github.com/harshit/crypt",
   },
   "projects/solana-notes.ts": {
     title: "Note-Taking DApp on Solana",
     stack: ["Next.js", "TypeScript", "Anchor", "Rust", "Solana", "Phantom"],
-    description: "A decentralized note-taking app powered by Anchor smart contracts and Program Derived Addresses.",
-    bullets: ["PDA-based note accounts", "CRUD through smart contracts", "Phantom wallet signing", "real-time account query updates"],
+    description: "Decentralized note-taking application using Anchor smart contracts and Program Derived Addresses.",
+    highlights: ["PDA note accounts", "CRUD via smart contracts", "Phantom signing", "Real-time account query updates"],
     demo: "https://demo.example.com/solana-notes",
     github: "https://github.com/harshit/solana-notes",
   },
   "projects/ai-saas.ts": {
     title: "AI SaaS Platform",
     stack: ["Next.js", "tRPC", "Drizzle ORM", "PostgreSQL", "Inngest", "Stream.io"],
-    description: "A production SaaS platform with real-time collaboration, billing, auth, and event-driven backend workflows.",
-    bullets: ["billing sync under 2 seconds", "25+ concurrent users", "meetings and messaging", "Vercel production deployment"],
+    description: "Production SaaS platform with real-time collaboration, billing, auth, and event-driven backend workflows.",
+    highlights: ["Billing sync under 2 seconds", "25+ concurrent users", "Meetings and messaging", "Vercel deployment"],
     demo: "https://demo.example.com/ai-saas",
     github: "https://github.com/harshit/ai-saas",
   },
-} as const;
+};
 
-function Line({ n, children }: { n: number; children: React.ReactNode }) {
-  return <div className="grid grid-cols-[44px_1fr] text-[12px] leading-[22px]"><span className="select-none pr-4 text-right text-[#858585]">{n}</span><code className="min-w-0 whitespace-pre-wrap break-words text-[#d4d4d4]">{children}</code></div>;
+const terminalBoot = ["pnpm dev --portfolio", "whoami", "cat contact.tsx", "git status --short"];
+
+function Line({ n, active, children }: { n: number; active?: boolean; children: React.ReactNode }) {
+  return <div className={`grid grid-cols-[48px_1fr] text-[12px] leading-[22px] ${active ? "bg-[#2a2d2e]" : ""}`}><span className="select-none pr-4 text-right text-[#858585]">{n}</span><code className="min-w-0 whitespace-pre-wrap break-words text-[#d4d4d4]">{children}</code></div>;
 }
 
-function Icon({ children, color = "text-[#569cd6]" }: { children: React.ReactNode; color?: string }) {
-  return <span className={`grid h-4 min-w-4 place-items-center rounded text-[9px] font-bold ${color}`}>{children}</span>;
+function FileIcon({ file }: { file: FileKey }) {
+  const meta = fileMeta[file];
+  return <span className={`grid h-4 min-w-5 place-items-center rounded text-[9px] font-bold ${meta.color}`}>{meta.icon}</span>;
 }
 
 export default function Home() {
   const [activeFile, setActiveFile] = useState<FileKey>("about.tsx");
   const [openTabs, setOpenTabs] = useState<FileKey[]>(["about.tsx", "projects/crypt.ts", "skills.json"]);
-  const [collapsed, setCollapsed] = useState<Record<FolderKey, boolean>>({ portfolio: false, projects: false });
+  const [activity, setActivity] = useState<Activity>("explorer");
   const [explorerOpen, setExplorerOpen] = useState(true);
   const [terminalOpen, setTerminalOpen] = useState(true);
-  const [mobileExplorer, setMobileExplorer] = useState(false);
+  const [folders, setFolders] = useState<Record<FolderKey, boolean>>({ portfolio: true, projects: true });
+  const [sidebarWidth, setSidebarWidth] = useState(252);
+  const [terminalHeight, setTerminalHeight] = useState(188);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [paletteQuery, setPaletteQuery] = useState("");
   const [terminalLines, setTerminalLines] = useState<string[]>([]);
+  const [terminalInput, setTerminalInput] = useState("");
+  const [preview, setPreview] = useState<Project | null>(null);
+  const [theme, setTheme] = useState<Theme>("dark");
+  const [context, setContext] = useState<{ x: number; y: number; file: FileKey } | null>(null);
+  const [mobilePanel, setMobilePanel] = useState(false);
+  const resizing = useRef<"sidebar" | "terminal" | null>(null);
 
   useEffect(() => {
     document.title = "Harshit Sharma — Visual Studio Code";
-    setTerminalLines([]);
-    terminalScript.forEach((line, i) => setTimeout(() => setTerminalLines((current) => [...current, line]), i * 190));
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      try {
+        const saved = JSON.parse(raw) as Partial<{ activeFile: FileKey; openTabs: FileKey[]; sidebarWidth: number; terminalHeight: number; theme: Theme; terminalOpen: boolean; explorerOpen: boolean }>;
+        if (saved.activeFile && allFiles.includes(saved.activeFile)) setActiveFile(saved.activeFile);
+        if (saved.openTabs?.every((f) => allFiles.includes(f))) setOpenTabs(saved.openTabs.length ? saved.openTabs : ["about.tsx"]);
+        if (saved.sidebarWidth) setSidebarWidth(saved.sidebarWidth);
+        if (saved.terminalHeight) setTerminalHeight(saved.terminalHeight);
+        if (saved.theme) setTheme(saved.theme);
+        if (typeof saved.terminalOpen === "boolean") setTerminalOpen(saved.terminalOpen);
+        if (typeof saved.explorerOpen === "boolean") setExplorerOpen(saved.explorerOpen);
+      } catch {}
+    }
+    let delay = 0;
+    terminalBoot.forEach((cmd) => {
+      setTimeout(() => executeCommand(cmd, true), delay);
+      delay += 650;
+    });
   }, []);
 
-  const current = files.find((file) => file.key === activeFile) ?? files[0];
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ activeFile, openTabs, sidebarWidth, terminalHeight, theme, terminalOpen, explorerOpen }));
+  }, [activeFile, openTabs, sidebarWidth, terminalHeight, theme, terminalOpen, explorerOpen]);
 
-  const openFile = (key: FileKey) => {
-    setActiveFile(key);
-    setOpenTabs((tabs) => (tabs.includes(key) ? tabs : [...tabs, key]));
-    setMobileExplorer(false);
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const ctrl = event.ctrlKey || event.metaKey;
+      if (ctrl && event.key.toLowerCase() === "p") { event.preventDefault(); setPaletteOpen(true); }
+      if (ctrl && event.key.toLowerCase() === "b") { event.preventDefault(); setExplorerOpen((v) => !v); }
+      if (ctrl && (event.key.toLowerCase() === "j" || event.key === "`")) { event.preventDefault(); setTerminalOpen((v) => !v); }
+      if (event.key === "Escape") { setPaletteOpen(false); setContext(null); setPreview(null); }
+    };
+    const onMove = (event: MouseEvent) => {
+      if (resizing.current === "sidebar") setSidebarWidth(Math.min(420, Math.max(180, event.clientX - 48)));
+      if (resizing.current === "terminal") setTerminalHeight(Math.min(420, Math.max(100, window.innerHeight - event.clientY - 24)));
+    };
+    const onUp = () => { resizing.current = null; };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => { window.removeEventListener("keydown", onKey); window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
+  }, []);
+
+  const openFile = (file: FileKey) => {
+    setOpenTabs((tabs) => tabs.includes(file) ? tabs : [...tabs, file]);
+    setActiveFile(file);
+    setPaletteOpen(false);
+    setMobilePanel(false);
   };
 
-  const closeTab = (key: FileKey) => {
+  const closeTab = (file: FileKey) => {
     setOpenTabs((tabs) => {
-      const next = tabs.filter((tab) => tab !== key);
-      if (activeFile === key) setActiveFile(next.at(-1) ?? "about.tsx");
+      const next = tabs.filter((tab) => tab !== file);
+      if (activeFile === file) setActiveFile(next.at(-1) ?? "about.tsx");
       return next.length ? next : ["about.tsx"];
     });
   };
 
-  const editor = useMemo(() => {
-    if (activeFile === "about.tsx") return <div className="py-3">
-      <Line n={1}><span className="text-[#569cd6]">import</span> &#123; Builder &#125; <span className="text-[#569cd6]">from</span> <span className="text-[#ce9178]">&quot;@/harshit&quot;</span>;</Line>
-      <Line n={2}> </Line>
-      <Line n={3}><span className="text-[#569cd6]">export const</span> profile: <span className="text-[#4ec9b0]">Builder</span> = &#123;</Line>
-      <Line n={4}>  name: <span className="text-[#ce9178]">&quot;Harshit Sharma&quot;</span>,</Line>
-      <Line n={5}>  education: <span className="text-[#ce9178]">&quot;B.Tech CSE (AI & Robotics), VIT Chennai, 2027&quot;</span>,</Line>
-      <Line n={6}>  role: <span className="text-[#ce9178]">&quot;Full-stack developer with deep Web3 work&quot;</span>,</Line>
-      <Line n={7}>  stack: [<span className="text-[#ce9178]">&quot;Next.js&quot;</span>, <span className="text-[#ce9178]">&quot;TypeScript&quot;</span>, <span className="text-[#ce9178]">&quot;React&quot;</span>, <span className="text-[#ce9178]">&quot;Node.js&quot;</span>],</Line>
-      <Line n={8}>  focus: [<span className="text-[#ce9178]">&quot;cryptography&quot;</span>, <span className="text-[#ce9178]">&quot;distributed systems&quot;</span>, <span className="text-[#ce9178]">&quot;blockchain infrastructure&quot;</span>],</Line>
-      <Line n={9}>  bio: <span className="text-[#ce9178]">&quot;I build products end-to-end, ship fast, and like understanding the system beneath the abstraction.&quot;</span>,</Line>
-      <Line n={10}>&#125;;</Line>
-    </div>;
+  const executeCommand = (command: string, boot = false) => {
+    const cmd = command.trim();
+    if (!cmd) return;
+    const response = cmd.includes("whoami") ? ["Harshit Sharma — CS AI & Robotics @ VIT Chennai"]
+      : cmd.includes("contact") ? ["email: harshit.sharma270905@gmail.com", "phone: +91 9145825568", "location: Chennai, India"]
+      : cmd.includes("git status") ? ["On branch main", "Changes: portfolio polished into VS Code Dark+ simulator", "No runtime errors detected"]
+      : cmd.includes("help") ? ["Commands: whoami, contact, git status, open about.tsx, open skills.json, theme"]
+      : cmd.startsWith("open ") ? (allFiles.includes(cmd.replace("open ", "") as FileKey) ? (openFile(cmd.replace("open ", "") as FileKey), [`Opened ${cmd.replace("open ", "")}`]) : ["File not found"])
+      : cmd.includes("theme") ? (setTheme((t) => t === "dark" ? "light" : "dark"), ["Theme toggled"])
+      : ["ready - compiled successfully", "Local: http://localhost:3000"];
+    setTerminalLines((lines) => [...lines, `${boot ? "$" : "harshit@portfolio:~$"} ${cmd}`, ...response]);
+    setTerminalInput("");
+  };
 
-    if (activeFile.startsWith("projects/")) {
-      const project = projectData[activeFile as keyof typeof projectData];
-      return <div className="py-3">
-        <Line n={1}><span className="text-[#569cd6]">export const</span> project = &#123;</Line>
-        <Line n={2}>  title: <span className="text-[#ce9178]">&quot;{project.title}&quot;</span>,</Line>
-        <Line n={3}>  stack: <span className="text-[#ce9178]">{JSON.stringify(project.stack)}</span>,</Line>
-        <Line n={4}>  description: <span className="text-[#ce9178]">&quot;{project.description}&quot;</span>,</Line>
-        <Line n={5}>  highlights: <span className="text-[#ce9178]">{JSON.stringify(project.bullets)}</span>,</Line>
-        <Line n={6}>  liveDemo: <span className="text-[#ce9178]">&quot;{project.demo}&quot;</span>,</Line>
-        <Line n={7}>  github: <span className="text-[#ce9178]">&quot;{project.github}&quot;</span>,</Line>
-        <Line n={8}>&#125; <span className="text-[#569cd6]">as const</span>;</Line>
-      </div>;
-    }
+  const editor = useMemo(() => renderEditor(activeFile, setPreview), [activeFile]);
+  const paletteItems = allFiles.filter((file) => file.toLowerCase().includes(paletteQuery.toLowerCase()));
+  const bg = theme === "dark" ? "bg-[#1e1e1e] text-[#d4d4d4]" : "bg-[#fffffe] text-[#1f2328]";
 
-    if (activeFile === "skills.json") return <pre className="p-4 text-[12px] leading-[22px] text-[#d4d4d4]"><span className="text-[#d4d4d4]">&#123;</span>{"\n"}  <span className="text-[#9cdcfe]">&quot;programming&quot;</span>: <span className="text-[#ce9178]">["C++", "JavaScript", "TypeScript", "Solidity"]</span>,{"\n"}  <span className="text-[#9cdcfe]">&quot;frontend_backend&quot;</span>: <span className="text-[#ce9178]">["React", "Next.js", "Node.js", "tRPC"]</span>,{"\n"}  <span className="text-[#9cdcfe]">&quot;databases"</span>: <span className="text-[#ce9178]">["PostgreSQL", "MongoDB", "Redis"]</span>,{"\n"}  <span className="text-[#9cdcfe]">&quot;tools"</span>: <span className="text-[#ce9178]">["Git", "Docker", "AWS", "Prisma", "Drizzle", "Vercel", "Bun"]</span>,{"\n"}  <span className="text-[#9cdcfe]">&quot;crypto_web3"</span>: <span className="text-[#ce9178]">["Ethereum", "Solana", "Anchor", "BIP39", "BIP44", "Ed25519", "ECDSA"]</span>{"\n"}<span>&#125;</span></pre>;
-
-    if (activeFile === "education.md") return <div className="p-4 text-[13px] leading-7"><p className="text-[#569cd6]"># Education</p><p><span className="text-[#dcdcaa]">VIT Chennai</span></p><p>B.Tech in Computer Science, AI & Robotics</p><p className="text-[#6a9955]">Aug 2023 — May 2027</p><p className="mt-3 text-[#d4d4d4]">Relevant coursework: DAA, Computer Networks, Theory of Computation, Compiler Design, DBMS.</p></div>;
-
-    return <div className="py-3">
-      <Line n={1}><span className="text-[#569cd6]">export default function</span> <span className="text-[#dcdcaa]">Contact</span>() &#123;</Line>
-      <Line n={2}>  <span className="text-[#569cd6]">return</span> &#123;</Line>
-      <Line n={3}>    email: <span className="text-[#ce9178]">&quot;harshit.sharma270905@gmail.com&quot;</span>,</Line>
-      <Line n={4}>    phone: <span className="text-[#ce9178]">&quot;+91 9145825568&quot;</span>,</Line>
-      <Line n={5}>    location: <span className="text-[#ce9178]">&quot;Chennai, India&quot;</span>,</Line>
-      <Line n={6}>    github: <span className="text-[#ce9178]">&quot;add-your-github&quot;</span>,</Line>
-      <Line n={7}>    linkedin: <span className="text-[#ce9178]">&quot;add-your-linkedin&quot;</span>,</Line>
-      <Line n={8}>  &#125;;</Line>
-      <Line n={9}>&#125;</Line>
-    </div>;
-  }, [activeFile]);
-
-  const Explorer = <aside className={`${explorerOpen ? "w-[245px]" : "w-0"} overflow-hidden border-r border-[#3c3c3c] bg-[#252526] transition-all duration-200`}>
-    <div className="flex h-9 items-center justify-between px-4 text-[11px] uppercase tracking-wide text-[#bbbbbb]"><span>Explorer</span><button onClick={() => setExplorerOpen(false)} className="text-[#cccccc]">×</button></div>
-    <div className="px-2 text-[12px] text-[#cccccc]">
-      <button onClick={() => setCollapsed((c) => ({ ...c, portfolio: !c.portfolio }))} className="flex w-full items-center gap-1 py-1 text-left font-bold uppercase"><span>{collapsed.portfolio ? "▸" : "▾"}</span> Portfolio</button>
-      {!collapsed.portfolio && files.filter(f => f.folder === "portfolio").map((file) => <button key={file.key} onClick={() => openFile(file.key)} className={`ml-3 flex w-[calc(100%-0.75rem)] items-center gap-2 px-2 py-1 text-left ${activeFile === file.key ? "bg-[#37373d] text-white" : "hover:bg-[#2a2d2e]"}`}><Icon color={file.icon === "MD" ? "text-[#519aba]" : "text-[#569cd6]"}>{file.icon}</Icon>{file.label}</button>)}
-      <button onClick={() => setCollapsed((c) => ({ ...c, projects: !c.projects }))} className="mt-1 flex w-full items-center gap-1 py-1 text-left font-bold uppercase"><span>{collapsed.projects ? "▸" : "▾"}</span> projects</button>
-      {!collapsed.projects && files.filter(f => f.folder === "projects").map((file) => <button key={file.key} onClick={() => openFile(file.key)} className={`ml-3 flex w-[calc(100%-0.75rem)] items-center gap-2 px-2 py-1 text-left ${activeFile === file.key ? "bg-[#37373d] text-white" : "hover:bg-[#2a2d2e]"}`}><Icon>TS</Icon>{file.label}</button>)}
-    </div>
-  </aside>;
-
-  return <main className="h-screen overflow-hidden bg-[#1e1e1e] font-mono text-[#d4d4d4]">
+  return <main className={`h-screen overflow-hidden font-mono ${bg}`} onClick={() => setContext(null)}>
     <div className="flex h-full flex-col">
-      <div className="flex h-8 shrink-0 items-center border-b border-[#3c3c3c] bg-[#323233] px-3 text-[12px] text-[#cccccc]">
+      <header className="flex h-8 shrink-0 items-center border-b border-[#3c3c3c] bg-[#323233] px-3 text-[12px] text-[#cccccc]">
         <div className="flex gap-2"><span className="h-3 w-3 rounded-full bg-[#ff5f57]"/><span className="h-3 w-3 rounded-full bg-[#febc2e]"/><span className="h-3 w-3 rounded-full bg-[#28c840]"/></div>
-        <div className="mx-auto hidden sm:block">Harshit Sharma — Visual Studio Code</div>
-        <button onClick={() => setMobileExplorer(true)} className="ml-auto sm:hidden">☰</button>
-      </div>
+        <button onClick={() => setPaletteOpen(true)} className="mx-auto hidden rounded border border-[#5a5a5a] bg-[#3c3c3c] px-28 py-0.5 text-[#cccccc] hover:bg-[#454545] md:block">Harshit Sharma — Visual Studio Code</button>
+        <button onClick={() => setMobilePanel(true)} className="ml-auto md:hidden">☰</button>
+      </header>
 
       <div className="min-h-0 flex flex-1">
-        <nav className="hidden w-12 shrink-0 flex-col items-center gap-4 border-r border-[#3c3c3c] bg-[#333333] py-3 text-xl text-[#cccccc] sm:flex"><button onClick={() => setExplorerOpen((v) => !v)} className={explorerOpen ? "text-white" : "text-[#858585]"}>📁</button><span>🔎</span><span>⑂</span><span>🐞</span><span className="mt-auto">⚙</span></nav>
-        <div className={`${mobileExplorer ? "fixed inset-0 z-30 flex sm:hidden" : "hidden"}`}><div className="w-[82vw] bg-[#252526]">{Explorer}</div><button className="flex-1 bg-black/50" onClick={() => setMobileExplorer(false)} /></div>
-        <div className="hidden sm:block">{Explorer}</div>
+        <nav className="hidden w-12 shrink-0 flex-col items-center border-r border-[#3c3c3c] bg-[#333333] py-2 text-[20px] text-[#858585] md:flex">
+          {([ ["explorer","📁"], ["search","🔎"], ["source","⑂"], ["extensions","▦"] ] as [Activity,string][]).map(([key, icon]) => <button key={key} onClick={() => { setActivity(key); setExplorerOpen(true); }} className={`mb-3 w-full border-l-2 py-1 ${activity === key ? "border-white text-white" : "border-transparent hover:text-[#cccccc]"}`}>{icon}</button>)}
+          <button onClick={() => setTheme((t) => t === "dark" ? "light" : "dark")} className="mt-auto py-2">◐</button>
+          <button className="py-2">⚙</button>
+        </nav>
 
-        <section className="flex min-w-0 flex-1 flex-col bg-[#1e1e1e]">
+        {mobilePanel && <div className="fixed inset-0 z-40 flex md:hidden"><div className="w-[84vw] bg-[#252526]"><SidePanel activity={activity} activeFile={activeFile} openFile={openFile} folders={folders} setFolders={setFolders} /></div><button aria-label="Close sidebar" className="flex-1 bg-black/50" onClick={() => setMobilePanel(false)} /></div>}
+
+        {explorerOpen && <div className="relative hidden shrink-0 md:block" style={{ width: sidebarWidth }}><SidePanel activity={activity} activeFile={activeFile} openFile={openFile} folders={folders} setFolders={setFolders} /><div onMouseDown={() => { resizing.current = "sidebar"; }} className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-[#007acc]" /></div>}
+
+        <section className="flex min-w-0 flex-1 flex-col">
           <div className="flex h-9 shrink-0 overflow-x-auto bg-[#252526]">
-            {openTabs.map((tab) => {
-              const file = files.find(f => f.key === tab)!;
-              return <button key={tab} onClick={() => setActiveFile(tab)} className={`group flex min-w-fit items-center gap-2 border-r border-[#3c3c3c] px-3 text-[12px] transition ${activeFile === tab ? "bg-[#1e1e1e] text-white" : "bg-[#2d2d2d] text-[#969696] hover:bg-[#333333]"}`}><Icon color={file.icon === "{}" ? "text-[#f1c40f]" : file.icon === "MD" ? "text-[#519aba]" : "text-[#569cd6]"}>{file.icon}</Icon>{file.label}<span onClick={(e) => { e.stopPropagation(); closeTab(tab); }} className="rounded px-1 opacity-60 hover:bg-[#454545] group-hover:opacity-100">×</span></button>;
-            })}
+            {openTabs.map((tab) => <button key={tab} onClick={() => openFile(tab)} onContextMenu={(e) => { e.preventDefault(); setContext({ x: e.clientX, y: e.clientY, file: tab }); }} className={`group flex min-w-fit items-center gap-2 border-r border-[#3c3c3c] px-3 text-[12px] transition ${activeFile === tab ? "bg-[#1e1e1e] text-white" : "bg-[#2d2d2d] text-[#969696] hover:bg-[#333333]"}`}><FileIcon file={tab}/>{fileMeta[tab].label}<span onClick={(e) => { e.stopPropagation(); closeTab(tab); }} className="rounded px-1 opacity-60 hover:bg-[#454545] group-hover:opacity-100">×</span></button>)}
           </div>
-          <div className="min-h-0 flex-1 overflow-auto bg-[#1e1e1e]">{editor}</div>
-          {terminalOpen && <div className="h-[190px] min-h-[120px] resize-y overflow-auto border-t border-[#3c3c3c] bg-[#1e1e1e]">
-            <div className="flex h-8 items-center gap-5 border-b border-[#3c3c3c] px-3 text-[11px] text-[#cccccc]"><span className="border-b border-[#007acc] pb-1 text-white">TERMINAL</span><span>OUTPUT</span><span>DEBUG CONSOLE</span><button onClick={() => setTerminalOpen(false)} className="ml-auto">×</button></div>
-            <div className="p-3 text-[12px] leading-5">{terminalLines.map((line, i) => <div key={i} className={line.startsWith("$") ? "text-[#4ec9b0]" : "text-[#d4d4d4]"}>{line}</div>)}<span className="inline-block h-4 w-2 animate-pulse bg-[#d4d4d4]" /></div>
-          </div>}
+          <div className="flex h-7 shrink-0 items-center gap-1 border-b border-[#2b2b2b] bg-[#1e1e1e] px-3 text-[11px] text-[#858585]"><span>portfolio</span><span>›</span><span>{activeFile.includes("/") ? "projects ›" : ""}</span><span className="text-[#cccccc]">{fileMeta[activeFile].label}</span></div>
+          <div className="grid min-h-0 flex-1 grid-cols-[1fr_86px] overflow-hidden bg-[#1e1e1e]"><div className="overflow-auto selection:bg-[#264f78]">{editor}</div><Minimap file={activeFile}/></div>
+          {terminalOpen && <div className="relative shrink-0 overflow-hidden border-t border-[#3c3c3c] bg-[#1e1e1e]" style={{ height: terminalHeight }}><div onMouseDown={() => { resizing.current = "terminal"; }} className="absolute left-0 top-0 h-1 w-full cursor-row-resize hover:bg-[#007acc]"/><div className="flex h-8 items-center gap-5 border-b border-[#3c3c3c] px-3 text-[11px] text-[#cccccc]"><span className="border-b border-[#007acc] pb-1 text-white">TERMINAL</span><span>PROBLEMS 0</span><span>OUTPUT</span><button onClick={() => setTerminalOpen(false)} className="ml-auto">×</button></div><div className="h-[calc(100%-2rem)] overflow-auto p-3 text-[12px] leading-5">{terminalLines.map((line, i) => <div key={i} className={line.includes("$") ? "text-[#4ec9b0]" : "text-[#d4d4d4]"}>{line}</div>)}<form onSubmit={(e) => { e.preventDefault(); executeCommand(terminalInput); }} className="flex"><span className="text-[#4ec9b0]">harshit@portfolio:~$&nbsp;</span><input aria-label="Terminal command" value={terminalInput} onChange={(e) => setTerminalInput(e.target.value)} className="flex-1 bg-transparent outline-none" placeholder="try: help"/><span className="animate-pulse">▌</span></form></div></div>}
         </section>
       </div>
-      <div className="flex h-6 shrink-0 items-center gap-4 bg-[#007acc] px-2 text-[11px] text-white"><span>⑂ main</span><span>✓ synced</span><span>{current.mode}</span><span>Ln 1, Col 1</span><button onClick={() => setTerminalOpen(true)} className="ml-auto">Terminal</button></div>
+      <footer className="flex h-6 shrink-0 items-center gap-4 bg-[#007acc] px-2 text-[11px] text-white"><span>⑂ main</span><span>$(sync)</span><span>{fileMeta[activeFile].mode}</span><span>UTF-8</span><span>Ln 1, Col 1</span><button onClick={() => setTerminalOpen(true)} className="ml-auto">Terminal</button></footer>
     </div>
+
+    {paletteOpen && <div className="fixed inset-0 z-50 bg-black/30 pt-16"><div className="mx-auto w-[min(680px,92vw)] overflow-hidden rounded-md border border-[#454545] bg-[#252526] shadow-2xl"><input autoFocus aria-label="Command palette" value={paletteQuery} onChange={(e) => setPaletteQuery(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && paletteItems[0]) openFile(paletteItems[0]); }} className="w-full border-b border-[#3c3c3c] bg-[#3c3c3c] px-4 py-3 text-sm outline-none" placeholder="Type a file name or command..." />{paletteItems.map((file) => <button key={file} onClick={() => openFile(file)} className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-[#094771]"><FileIcon file={file}/>{file}</button>)}<button onClick={() => setTheme((t) => t === "dark" ? "light" : "dark")} className="flex w-full px-4 py-2 text-left text-sm hover:bg-[#094771]">Toggle Color Theme</button></div></div>}
+    {context && <div className="fixed z-50 w-44 rounded border border-[#454545] bg-[#252526] py-1 text-[12px] shadow-xl" style={{ left: context.x, top: context.y }}><button onClick={() => closeTab(context.file)} className="block w-full px-3 py-1.5 text-left hover:bg-[#094771]">Close</button><button onClick={() => setOpenTabs([context.file])} className="block w-full px-3 py-1.5 text-left hover:bg-[#094771]">Close Others</button><button onClick={() => navigator.clipboard?.writeText(context.file)} className="block w-full px-3 py-1.5 text-left hover:bg-[#094771]">Copy Path</button></div>}
+    {preview && <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4"><div className="max-w-xl rounded-lg border border-[#3c3c3c] bg-[#252526] p-5 shadow-2xl"><div className="mb-3 flex items-center justify-between"><h2 className="text-lg font-bold text-white">{preview.title}</h2><button onClick={() => setPreview(null)}>×</button></div><p className="text-sm leading-6 text-[#d4d4d4]">{preview.description}</p><div className="mt-4 flex flex-wrap gap-2">{preview.stack.map((s) => <span key={s} className="rounded bg-[#37373d] px-2 py-1 text-xs">{s}</span>)}</div><div className="mt-5 flex gap-3"><a href={preview.demo} className="rounded bg-[#007acc] px-3 py-2 text-sm text-white">Live demo</a><a href={preview.github} className="rounded border border-[#555] px-3 py-2 text-sm">GitHub</a></div></div></div>}
   </main>;
+}
+
+function SidePanel({ activity, activeFile, openFile, folders, setFolders }: { activity: Activity; activeFile: FileKey; openFile: (f: FileKey) => void; folders: Record<FolderKey, boolean>; setFolders: React.Dispatch<React.SetStateAction<Record<FolderKey, boolean>>> }) {
+  if (activity === "search") return <aside className="h-full border-r border-[#3c3c3c] bg-[#252526]"><PanelTitle title="Search"/><div className="p-3"><input className="w-full border border-[#3c3c3c] bg-[#3c3c3c] px-2 py-1 text-[12px] outline-none" placeholder="Search Harshit portfolio"/><p className="mt-3 text-[12px] text-[#858585]">3 results in projects, skills, contact.</p></div></aside>;
+  if (activity === "source") return <aside className="h-full border-r border-[#3c3c3c] bg-[#252526]"><PanelTitle title="Source Control"/><div className="p-3 text-[12px]"><p className="mb-2 text-[#cccccc]">CHANGES</p>{["about.tsx", "projects/crypt.ts", "skills.json"].map((f) => <p key={f} className="py-1 text-[#d4d4d4]">M {f}</p>)}</div></aside>;
+  if (activity === "extensions") return <aside className="h-full border-r border-[#3c3c3c] bg-[#252526]"><PanelTitle title="Extensions"/><div className="space-y-2 p-3 text-[12px]"><p>✓ TypeScript</p><p>✓ Tailwind CSS IntelliSense</p><p>✓ Solidity</p><p>✓ Rust Analyzer</p></div></aside>;
+  return <aside className="h-full border-r border-[#3c3c3c] bg-[#252526]"><PanelTitle title="Explorer"/><div className="px-2 text-[12px]"><Folder name="PORTFOLIO" open={folders.portfolio} toggle={() => setFolders((f) => ({ ...f, portfolio: !f.portfolio }))}/>{folders.portfolio && (["about.tsx", "skills.json", "education.md", "contact.tsx"] as FileKey[]).map((file) => <FileRow key={file} file={file} active={activeFile === file} openFile={openFile}/>)}<Folder name="PROJECTS" open={folders.projects} toggle={() => setFolders((f) => ({ ...f, projects: !f.projects }))}/>{folders.projects && (["projects/crypt.ts", "projects/solana-notes.ts", "projects/ai-saas.ts"] as FileKey[]).map((file) => <FileRow key={file} file={file} active={activeFile === file} openFile={openFile}/>)}</div></aside>;
+}
+
+function PanelTitle({ title }: { title: string }) { return <div className="h-9 px-4 py-2 text-[11px] uppercase tracking-wide text-[#bbbbbb]">{title}</div>; }
+function Folder({ name, open, toggle }: { name: string; open: boolean; toggle: () => void }) { return <button onClick={toggle} className="flex w-full items-center gap-1 py-1 text-left font-bold uppercase text-[#cccccc]"><span>{open ? "▾" : "▸"}</span>{name}</button>; }
+function FileRow({ file, active, openFile }: { file: FileKey; active: boolean; openFile: (f: FileKey) => void }) { return <button onClick={() => openFile(file)} className={`ml-3 flex w-[calc(100%-0.75rem)] items-center gap-2 px-2 py-1 text-left ${active ? "bg-[#37373d] text-white" : "text-[#cccccc] hover:bg-[#2a2d2e]"}`}><FileIcon file={file}/>{fileMeta[file].label}</button>; }
+function Minimap({ file }: { file: FileKey }) { return <aside className="hidden border-l border-[#2b2b2b] bg-[#1e1e1e] p-2 opacity-70 lg:block">{Array.from({ length: 38 }).map((_, i) => <div key={i} className={`mb-1 h-1 rounded ${i % 5 === 0 ? "bg-[#569cd6]" : i % 3 === 0 ? "bg-[#ce9178]" : "bg-[#6a9955]"}`} style={{ width: `${30 + ((i * file.length) % 44)}px` }}/>)}</aside>; }
+
+function renderEditor(activeFile: FileKey, setPreview: (p: Project) => void) {
+  if (activeFile === "about.tsx") return <div className="py-3"><Line n={1}><span className="text-[#569cd6]">import</span> &#123; Builder &#125; <span className="text-[#569cd6]">from</span> <span className="text-[#ce9178]">&quot;@/harshit&quot;</span>;</Line><Line n={2}> </Line><Line n={3} active><span className="text-[#569cd6]">export const</span> profile: <span className="text-[#4ec9b0]">Builder</span> = &#123;</Line><Line n={4}>  name: <span className="text-[#ce9178]">&quot;Harshit Sharma&quot;</span>,</Line><Line n={5}>  education: <span className="text-[#ce9178]">&quot;B.Tech CSE (AI & Robotics), VIT Chennai, 2027&quot;</span>,</Line><Line n={6}>  role: <span className="text-[#ce9178]">&quot;Full-stack developer with deep Web3 work&quot;</span>,</Line><Line n={7}>  bio: <span className="text-[#ce9178]">&quot;I build products end-to-end with Next.js, TypeScript, React, Node.js, and blockchain systems.&quot;</span>,</Line><Line n={8}>  values: [<span className="text-[#ce9178]">&quot;ship fast&quot;</span>, <span className="text-[#ce9178]">&quot;understand deeply&quot;</span>, <span className="text-[#ce9178]">&quot;avoid unnecessary process&quot;</span>],</Line><Line n={9}>&#125;;<span className="ml-1 inline-block h-4 w-2 animate-pulse bg-[#d4d4d4] align-middle" /></Line></div>;
+  if (activeFile.startsWith("projects/")) { const p = projects[activeFile as keyof typeof projects]; return <div className="py-3"><Line n={1}><span className="text-[#569cd6]">export const</span> project = &#123;</Line><Line n={2}>  title: <span className="text-[#ce9178]">&quot;{p.title}&quot;</span>,</Line><Line n={3}>  stack: <span className="text-[#ce9178]">{JSON.stringify(p.stack)}</span>,</Line><Line n={4}>  description: <span className="text-[#ce9178]">&quot;{p.description}&quot;</span>,</Line><Line n={5}>  highlights: <span className="text-[#ce9178]">{JSON.stringify(p.highlights)}</span>,</Line><Line n={6}>  liveDemo: <span className="text-[#ce9178]">&quot;{p.demo}&quot;</span>,</Line><Line n={7}>  github: <span className="text-[#ce9178]">&quot;{p.github}&quot;</span>,</Line><Line n={8}>&#125; <span className="text-[#569cd6]">as const</span>;</Line><div className="ml-12 mt-4"><button onClick={() => setPreview(p)} className="rounded bg-[#007acc] px-3 py-1.5 text-[12px] text-white hover:bg-[#0e86d4]">Open Preview</button></div></div>; }
+  if (activeFile === "skills.json") return <pre className="p-4 text-[12px] leading-[22px]"><span>&#123;</span>{"\n"}  <span className="text-[#9cdcfe]">&quot;programming&quot;</span>: <span className="text-[#ce9178]">["C++", "JavaScript", "TypeScript", "Solidity"]</span>,{"\n"}  <span className="text-[#9cdcfe]">&quot;frameworks&quot;</span>: <span className="text-[#ce9178]">["React", "Next.js", "Node.js", "tRPC"]</span>,{"\n"}  <span className="text-[#9cdcfe]">&quot;databases"</span>: <span className="text-[#ce9178]">["PostgreSQL", "MongoDB", "Redis"]</span>,{"\n"}  <span className="text-[#9cdcfe]">&quot;web3_crypto"</span>: <span className="text-[#ce9178]">["Ethereum", "Solana", "Anchor", "BIP39", "BIP44", "Ed25519", "ECDSA"]</span>{"\n"}<span>&#125;</span></pre>;
+  if (activeFile === "education.md") return <div className="p-4 text-[13px] leading-7"><p className="text-[#569cd6]"># Education</p><p><span className="text-[#dcdcaa]">VIT Chennai</span></p><p>B.Tech in Computer Science, AI & Robotics</p><p className="text-[#6a9955]">Aug 2023 — May 2027</p><p>Coursework: DAA, Computer Networks, TOC, Compiler Design, DBMS.</p></div>;
+  return <div className="py-3"><Line n={1}><span className="text-[#569cd6]">export default function</span> <span className="text-[#dcdcaa]">Contact</span>() &#123;</Line><Line n={2}>  <span className="text-[#569cd6]">return</span> &#123;</Line><Line n={3}>    email: <span className="text-[#ce9178]">&quot;harshit.sharma270905@gmail.com&quot;</span>,</Line><Line n={4}>    phone: <span className="text-[#ce9178]">&quot;+91 9145825568&quot;</span>,</Line><Line n={5}>    location: <span className="text-[#ce9178]">&quot;Chennai, India&quot;</span>,</Line><Line n={6}>  &#125;;</Line><Line n={7}>&#125;</Line></div>;
 }
