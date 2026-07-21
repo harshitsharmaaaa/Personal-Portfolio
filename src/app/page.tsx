@@ -1,248 +1,243 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+
+type FileKey = "about.tsx" | "projects.tsx" | "skills.json" | "education.md" | "contact.env";
+
 type Project = {
   title: string;
-  file: string;
   description: string;
-  bullets: string[];
   stack: string[];
+  bullets: string[];
 };
+
+const fileTree: { name: FileKey; folder: string }[] = [
+  { folder: "About", name: "about.tsx" },
+  { folder: "Projects", name: "projects.tsx" },
+  { folder: "Skills", name: "skills.json" },
+  { folder: "Education", name: "education.md" },
+  { folder: "Contact", name: "contact.env" },
+];
 
 const projects: Project[] = [
   {
     title: "Crypt",
-    file: "crypt.wallet.ts",
-    description: "Multi-chain HD wallet generator and blockchain explorer.",
+    description: "Multi-chain HD wallet generator and blockchain explorer for Ethereum + Solana.",
+    stack: ["Next.js", "TypeScript", "ethers.js", "Solana web3.js", "BIP39/BIP44"],
     bullets: [
-      "Built a multi-chain HD wallet generator for Ethereum and Solana with real BIP39/BIP44 cryptographic key derivation and a fully client-side privacy model.",
-      "Implemented BIP39/BIP44 wallet generation for Ethereum and Solana.",
-      "Added automatic RPC failover for reliable blockchain queries.",
-      "Built mnemonic validation for 12 and 24-word recovery phrases.",
-      "Designed a privacy-first flow where private keys never leave the browser.",
+      "Real BIP39/BIP44 cryptographic key derivation from mnemonic phrases.",
+      "Fully client-side architecture so private keys never leave the browser.",
+      "Automatic RPC failover for reliable Ethereum and Solana blockchain queries.",
     ],
-    stack: ["Next.js", "TypeScript", "ethers.js", "@solana/web3.js", "BIP39"],
   },
   {
-    title: "Note-Taking DApp",
-    file: "solana-notes.anchor.rs",
-    description: "Decentralized note-taking application on Solana.",
+    title: "Solana Notes DApp",
+    description: "Decentralized note-taking app using Anchor smart contracts and PDAs.",
+    stack: ["Next.js", "TypeScript", "Anchor", "Solana", "Phantom"],
     bullets: [
-      "Built CRUD operations through Anchor smart contracts using PDAs.",
-      "Integrated Phantom Wallet for authentication and transaction signing.",
-      "Managed on-chain notes with Anchor account queries and real-time UI updates.",
+      "CRUD operations through Program Derived Addresses.",
+      "Phantom wallet authentication and transaction signing.",
+      "Real-time UI updates from Anchor account queries.",
     ],
-    stack: ["Next.js", "TypeScript", "Solana", "Anchor", "Rust"],
   },
   {
     title: "AI SaaS Platform",
-    file: "ai-saas.realtime.ts",
-    description: "Real-time SaaS platform with billing, auth, meetings, and messaging.",
+    description: "Real-time SaaS with billing, messaging, meetings, and event-driven workflows.",
+    stack: ["tRPC", "Drizzle", "PostgreSQL", "Inngest", "Stream.io"],
     bullets: [
-      "Reduced billing-state synchronization delay to under 2 seconds using Inngest workflows.",
-      "Enabled collaboration for 25+ concurrent users with Stream.io meetings and messaging.",
-      "Built authentication, billing, and backend services with tRPC, Drizzle ORM, and PostgreSQL.",
-      "Deployed the production application on Vercel using Git-based workflows.",
+      "Billing sync reduced to under 2 seconds using Inngest workflows.",
+      "Collaboration support for 25+ concurrent users.",
+      "Authentication, billing, backend services, and Vercel deployment.",
     ],
-    stack: ["Next.js", "tRPC", "Drizzle", "PostgreSQL", "Inngest"],
-  },
-  {
-    title: "Modern Company Website",
-    file: "company-site.next.tsx",
-    description: "Responsive company website optimized for performance and reliability.",
-    bullets: [
-      "Improved page load performance with lazy loading and optimized rendering.",
-      "Reduced production bugs through strict TypeScript and ESLint practices.",
-      "Developed responsive UI using Next.js, React, and TypeScript.",
-    ],
-    stack: ["Next.js", "React", "TypeScript", "ESLint"],
   },
 ];
 
-const skillGroups = [
-  {
-    label: "Programming",
-    items: ["C++", "JavaScript", "TypeScript", "Solidity", "HTML", "CSS"],
-  },
-  {
-    label: "Blockchain",
-    items: ["Ethereum", "Solana", "ethers.js", "@solana/web3.js", "Anchor", "HD Wallets", "Smart Contracts", "ENS"],
-  },
-  {
-    label: "Cryptography",
-    items: ["BIP39", "BIP44", "Ed25519", "ECDSA", "Digital Signatures", "Hash Functions"],
-  },
-  {
-    label: "Frameworks & Backend",
-    items: ["React.js", "Next.js", "Node.js", "tRPC", "PostgreSQL", "MongoDB", "Redis"],
-  },
-  {
-    label: "Tools",
-    items: ["Git", "Docker", "AWS", "Prisma", "Drizzle ORM", "Vercel", "Netlify", "Bun"],
-  },
+const skills = {
+  programming: ["C++", "JavaScript", "TypeScript", "Solidity", "HTML", "CSS"],
+  frontend_backend: ["React", "Next.js", "Node.js", "tRPC", "Prisma", "Drizzle ORM"],
+  databases_tools: ["PostgreSQL", "MongoDB", "Redis", "Docker", "AWS", "Git", "Vercel", "Bun"],
+  blockchain_crypto: ["Ethereum", "Solana", "Anchor", "HD Wallets", "BIP39", "BIP44", "Ed25519", "ECDSA"],
+};
+
+const terminalBoot = [
+  "$ whoami",
+  "Harshit Sharma — full-stack + Web3 developer",
+  "$ cat focus.txt",
+  "Next.js • TypeScript • React • Node.js • Solana • Ethereum • distributed systems",
+  "$ npm run portfolio",
+  "Compiled: about.tsx, projects.tsx, skills.json, education.md, contact.env",
+  "$ contact --email",
+  "harshit.sharma270905@gmail.com",
 ];
 
-const explorerFiles = [
-  "about.harshit.ts",
-  "education.vit.md",
-  "crypt.wallet.ts",
-  "solana-notes.anchor.rs",
-  "ai-saas.realtime.ts",
-  "skills.json",
-  "contact.env",
-];
+function CodeLine({ n, children }: { n: number; children: React.ReactNode }) {
+  return (
+    <div className="grid grid-cols-[2.5rem_1fr] gap-3 leading-6">
+      <span className="select-none text-right text-[11px] text-slate-600">{n}</span>
+      <div className="min-w-0 text-slate-300">{children}</div>
+    </div>
+  );
+}
 
 export default function Home() {
+  const [activeFile, setActiveFile] = useState<FileKey>("about.tsx");
+  const [openTabs, setOpenTabs] = useState<FileKey[]>(["about.tsx", "projects.tsx", "skills.json"]);
+  const [terminalLines, setTerminalLines] = useState<string[]>([]);
+
+  useEffect(() => {
+    setTerminalLines([]);
+    terminalBoot.forEach((line, index) => {
+      window.setTimeout(() => {
+        setTerminalLines((current) => [...current, line]);
+      }, index * 220);
+    });
+  }, []);
+
+  const openFile = (file: FileKey) => {
+    setActiveFile(file);
+    setOpenTabs((tabs) => (tabs.includes(file) ? tabs : [...tabs, file]));
+  };
+
+  const closeTab = (file: FileKey) => {
+    setOpenTabs((tabs) => {
+      const next = tabs.filter((tab) => tab !== file);
+      if (activeFile === file) setActiveFile(next.at(-1) ?? "about.tsx");
+      return next.length ? next : ["about.tsx"];
+    });
+  };
+
+  const content = useMemo(() => {
+    if (activeFile === "about.tsx") {
+      return (
+        <div className="p-4 text-[13px] sm:p-5">
+          <CodeLine n={1}><span className="text-purple-300">export default function</span> <span className="text-yellow-200">About</span>() &#123;</CodeLine>
+          <CodeLine n={2}>  <span className="text-purple-300">const</span> profile = &#123;</CodeLine>
+          <CodeLine n={3}>    name: <span className="text-amber-200">&quot;Harshit Sharma&quot;</span>,</CodeLine>
+          <CodeLine n={4}>    role: <span className="text-amber-200">&quot;Full-stack Developer + Web3 Builder&quot;</span>,</CodeLine>
+          <CodeLine n={5}>    college: <span className="text-amber-200">&quot;VIT Chennai, CSE AI & Robotics, 2027&quot;</span>,</CodeLine>
+          <CodeLine n={6}>    stack: [<span className="text-amber-200">&quot;Next.js&quot;</span>, <span className="text-amber-200">&quot;TypeScript&quot;</span>, <span className="text-amber-200">&quot;React&quot;</span>, <span className="text-amber-200">&quot;Node.js&quot;</span>],</CodeLine>
+          <CodeLine n={7}>  &#125;;</CodeLine>
+          <CodeLine n={8}> </CodeLine>
+          <CodeLine n={9}>  <span className="text-slate-500">// Bio</span></CodeLine>
+          <CodeLine n={10}>  <span className="text-emerald-300">return</span> <span className="text-amber-200">&quot;I build products end-to-end, with deep interest in cryptography, distributed systems, and blockchain infrastructure. I like shipping fast, but I also care about understanding the system beneath the abstraction.&quot;</span>;</CodeLine>
+          <CodeLine n={11}>&#125;</CodeLine>
+        </div>
+      );
+    }
+
+    if (activeFile === "projects.tsx") {
+      return (
+        <div className="grid gap-3 p-4 text-[13px] sm:grid-cols-3 sm:p-5">
+          {projects.map((project) => (
+            <article key={project.title} className="rounded-xl border border-white/10 bg-[#111827] p-4">
+              <div className="mb-3 flex items-start justify-between gap-2">
+                <h2 className="text-base font-bold text-white">{project.title}</h2>
+                <span className="rounded bg-emerald-400/10 px-2 py-1 text-[10px] text-emerald-300">built</span>
+              </div>
+              <p className="text-xs leading-5 text-slate-300">{project.description}</p>
+              <ul className="mt-3 space-y-1.5 text-[11px] leading-5 text-slate-400">
+                {project.bullets.map((bullet) => <li key={bullet}>✓ {bullet}</li>)}
+              </ul>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {project.stack.map((tech) => <span key={tech} className="rounded border border-white/10 px-2 py-1 text-[10px] text-sky-200">{tech}</span>)}
+              </div>
+            </article>
+          ))}
+        </div>
+      );
+    }
+
+    if (activeFile === "skills.json") {
+      return (
+        <pre className="overflow-auto p-4 text-[12px] leading-6 text-slate-300 sm:p-5">
+          <span className="text-slate-500">&#123;</span>{"\n"}
+          {Object.entries(skills).map(([key, values], index) => (
+            <span key={key}>  <span className="text-sky-300">&quot;{key}&quot;</span>: <span className="text-amber-200">{JSON.stringify(values)}</span>{index < Object.keys(skills).length - 1 ? "," : ""}{"\n"}</span>
+          ))}
+          <span className="text-slate-500">&#125;</span>
+        </pre>
+      );
+    }
+
+    if (activeFile === "education.md") {
+      return (
+        <div className="p-4 text-[13px] leading-7 text-slate-300 sm:p-5">
+          <h1 className="text-xl font-bold text-white"># Education</h1>
+          <p className="mt-3"><span className="text-amber-200">VIT Chennai</span> — B.Tech Computer Science, AI & Robotics</p>
+          <p>Timeline: Aug 2023 → May 2027</p>
+          <p className="mt-3 text-slate-400">Relevant coursework: Design and Analysis of Algorithms, Computer Networks, Theory of Computation, Compiler Design, Database Management Systems.</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="p-4 text-[13px] leading-7 sm:p-5">
+        <CodeLine n={1}>EMAIL=<span className="text-amber-200">harshit.sharma270905@gmail.com</span></CodeLine>
+        <CodeLine n={2}>LOCATION=<span className="text-amber-200">Chennai, India</span></CodeLine>
+        <CodeLine n={3}>GITHUB=<span className="text-slate-500">add-your-github-link</span></CodeLine>
+        <CodeLine n={4}>LINKEDIN=<span className="text-slate-500">add-your-linkedin-link</span></CodeLine>
+      </div>
+    );
+  }, [activeFile]);
+
   return (
-    <main className="min-h-screen bg-[#0d1117] text-slate-100">
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(56,189,248,0.14),transparent_28%),radial-gradient(circle_at_82%_10%,rgba(251,191,36,0.12),transparent_24%),linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[length:auto,auto,36px_36px,36px_36px]" />
+    <main className="h-screen overflow-hidden bg-[#0d1117] p-2 text-slate-100 sm:p-3">
+      <div className="mx-auto flex h-full w-full max-w-[1500px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1e1e1e] shadow-2xl">
+        <div className="flex h-9 shrink-0 items-center gap-2 border-b border-white/10 bg-[#181818] px-3">
+          <span className="size-2.5 rounded-full bg-[#ff5f56]" />
+          <span className="size-2.5 rounded-full bg-[#ffbd2e]" />
+          <span className="size-2.5 rounded-full bg-[#27c93f]" />
+          <span className="ml-3 truncate text-[11px] text-slate-400">harshit-sharma-portfolio — VS Code</span>
+        </div>
 
-      <section className="relative mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="overflow-hidden rounded-3xl border border-white/10 bg-[#1e1e1e] shadow-2xl shadow-black/40">
-          <div className="flex items-center gap-2 border-b border-white/10 bg-[#181818] px-4 py-3">
-            <span className="size-3 rounded-full bg-[#ff5f56]" />
-            <span className="size-3 rounded-full bg-[#ffbd2e]" />
-            <span className="size-3 rounded-full bg-[#27c93f]" />
-            <span className="ml-4 text-xs text-slate-400">harshit-sharma-portfolio — Visual Studio Code</span>
-          </div>
+        <div className="grid min-h-0 flex-1 grid-cols-1 sm:grid-cols-[210px_1fr]">
+          <aside className="hidden border-r border-white/10 bg-[#161b22] sm:block">
+            <div className="border-b border-white/10 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Explorer</div>
+            <div className="p-2">
+              {fileTree.map((file) => (
+                <button key={file.name} onClick={() => openFile(file.name)} className={`mb-1 flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[12px] ${activeFile === file.name ? "bg-[#24324a] text-white" : "text-slate-300 hover:bg-white/10"}`}>
+                  <span className="text-sky-300">▸</span>
+                  <span className="truncate">{file.name}</span>
+                </button>
+              ))}
+            </div>
+          </aside>
 
-          <div className="grid min-h-[calc(100vh-7rem)] grid-cols-1 lg:grid-cols-[260px_1fr]">
-            <aside className="border-b border-white/10 bg-[#161b22] lg:border-b-0 lg:border-r">
-              <div className="border-b border-white/10 px-4 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Explorer
-              </div>
-              <div className="p-4">
-                <p className="mb-3 text-xs font-bold uppercase text-slate-500">Harshit Sharma</p>
-                <div className="space-y-1 text-sm">
-                  {explorerFiles.map((file) => (
-                    <a key={file} href={file.includes("contact") ? "#contact" : file.includes("skills") ? "#skills" : file.includes("education") ? "#education" : file.includes("about") ? "#about" : "#projects"} className="flex items-center gap-2 rounded-lg px-2 py-2 text-slate-300 hover:bg-white/10 hover:text-white">
-                      <span className="text-amber-300">▸</span>
-                      {file}
-                    </a>
-                  ))}
-                </div>
-              </div>
-              <div className="border-t border-white/10 p-4 text-xs leading-6 text-slate-400">
-                <p>📍 Chennai, India</p>
-                <p>🎓 VIT Chennai</p>
-                <p>🤖 CSE, AI & Robotics</p>
-              </div>
-            </aside>
-
-            <div className="flex min-w-0 flex-col">
-              <nav className="flex overflow-x-auto border-b border-white/10 bg-[#111827] text-sm">
-                {["about.harshit.ts", "projects.ts", "skills.json", "contact.env"].map((tab, index) => (
-                  <a key={tab} href={index === 0 ? "#about" : index === 1 ? "#projects" : index === 2 ? "#skills" : "#contact"} className="border-r border-white/10 px-5 py-3 text-slate-300 hover:bg-white/5">
-                    {tab}
-                  </a>
+          <section className="flex min-w-0 flex-col">
+            <div className="flex shrink-0 overflow-x-auto border-b border-white/10 bg-[#111827]">
+              <div className="flex sm:hidden">
+                {fileTree.map((file) => (
+                  <button key={file.name} onClick={() => openFile(file.name)} className="border-r border-white/10 px-3 py-2 text-[11px] text-slate-300">{file.name}</button>
                 ))}
-              </nav>
+              </div>
+              {openTabs.map((tab) => (
+                <button key={tab} onClick={() => setActiveFile(tab)} className={`group flex items-center gap-2 border-r border-white/10 px-3 py-2 text-[12px] ${activeFile === tab ? "bg-[#1e1e1e] text-white" : "text-slate-400 hover:bg-white/5"}`}>
+                  <span>{tab}</span>
+                  <span onClick={(event) => { event.stopPropagation(); closeTab(tab); }} className="rounded px-1 text-slate-500 hover:bg-white/10 hover:text-white">×</span>
+                </button>
+              ))}
+            </div>
 
-              <div className="flex-1 overflow-hidden">
-                <section id="about" className="grid gap-10 px-5 py-10 md:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:py-16">
-                  <div>
-                    <p className="font-mono text-sm text-sky-300">const developer = &#123;</p>
-                    <h1 className="mt-5 max-w-4xl text-5xl font-black tracking-[-0.06em] text-white sm:text-7xl">
-                      Harshit Sharma
-                    </h1>
-                    <p className="mt-5 text-2xl font-semibold text-amber-200">
-                      Computer Science student building blockchain, AI SaaS, and real-time web systems.
-                    </p>
-                    <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">
-                      I build products end-to-end, mostly with Next.js, TypeScript, React, and Node.js, with a strong secondary focus on Web3 and blockchain systems. I care about understanding systems deeply, especially cryptography and distributed systems, and shipping fast without unnecessary process.
-                    </p>
-                    <div className="mt-8 flex flex-wrap gap-3">
-                      <a className="rounded-full bg-sky-400 px-6 py-3 font-bold text-slate-950 hover:bg-sky-300" href="mailto:harshit.sharma270905@gmail.com">Email me</a>
-                      <a className="rounded-full border border-white/15 px-6 py-3 font-bold text-white hover:border-amber-200 hover:text-amber-100" href="#projects">View projects</a>
-                    </div>
-                  </div>
+            <div className="min-h-0 flex-1 overflow-auto bg-[#0d1117]">
+              {content}
+            </div>
 
-                  <div className="rounded-3xl border border-white/10 bg-[#0d1117] p-5 font-mono text-sm leading-7 shadow-xl">
-                    <p><span className="text-purple-300">export const</span> harshit = &#123;</p>
-                    <p className="pl-5"><span className="text-sky-300">location</span>: <span className="text-amber-200">&quot;Chennai, India&quot;</span>,</p>
-                    <p className="pl-5"><span className="text-sky-300">college</span>: <span className="text-amber-200">&quot;VIT Chennai&quot;</span>,</p>
-                    <p className="pl-5"><span className="text-sky-300">degree</span>: <span className="text-amber-200">&quot;B.Tech CSE, AI & Robotics&quot;</span>,</p>
-                    <p className="pl-5"><span className="text-sky-300">focus</span>: [<span className="text-amber-200">&quot;blockchain&quot;</span>, <span className="text-amber-200">&quot;ai-saas&quot;</span>, <span className="text-amber-200">&quot;web3&quot;</span>],</p>
-                    <p className="pl-5"><span className="text-sky-300">email</span>: <span className="text-amber-200">&quot;harshit.sharma270905@gmail.com&quot;</span></p>
-                    <p>&#125;;</p>
-                  </div>
-                </section>
-
-                <section id="education" className="border-t border-white/10 px-5 py-10 md:px-8">
-                  <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-7">
-                    <p className="text-sm font-bold uppercase tracking-[0.28em] text-sky-300">Education</p>
-                    <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-                      <div>
-                        <h2 className="text-3xl font-black text-white">VIT Chennai</h2>
-                        <p className="mt-2 text-slate-300">B.Tech in Computer Science, AI & Robotics</p>
-                      </div>
-                      <p className="text-amber-200">Aug 2023 — May 2027</p>
-                    </div>
-                    <p className="mt-5 text-slate-400">Relevant coursework: Design and Analysis of Algorithms, Computer Networks, Theory of Computation, Compiler Design, Database Management Systems.</p>
-                  </div>
-                </section>
-
-                <section id="projects" className="border-t border-white/10 px-5 py-10 md:px-8">
-                  <div className="mb-8">
-                    <p className="text-sm font-bold uppercase tracking-[0.28em] text-amber-200">Projects</p>
-                    <h2 className="mt-3 text-4xl font-black tracking-tight text-white">Production-minded builds</h2>
-                  </div>
-                  <div className="grid gap-5 xl:grid-cols-2">
-                    {projects.map((project) => (
-                      <article key={project.title} className="rounded-3xl border border-white/10 bg-[#0d1117] p-6 transition hover:-translate-y-1 hover:border-sky-300/50">
-                        <div className="mb-5 flex items-center justify-between gap-4 border-b border-white/10 pb-4">
-                          <div>
-                            <h3 className="text-2xl font-black text-white">{project.title}</h3>
-                            <p className="mt-1 text-sm text-sky-300">{project.file}</p>
-                          </div>
-                          <span className="rounded-full bg-emerald-400/10 px-3 py-1 text-xs font-bold text-emerald-300">built</span>
-                        </div>
-                        <p className="text-slate-300">{project.description}</p>
-                        <ul className="mt-5 space-y-3 text-sm leading-6 text-slate-400">
-                          {project.bullets.map((bullet) => <li key={bullet}>✓ {bullet}</li>)}
-                        </ul>
-                        <div className="mt-6 flex flex-wrap gap-2">
-                          {project.stack.map((tech) => <span key={tech} className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-slate-300">{tech}</span>)}
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                </section>
-
-                <section id="skills" className="border-t border-white/10 px-5 py-10 md:px-8">
-                  <p className="text-sm font-bold uppercase tracking-[0.28em] text-sky-300">Skills</p>
-                  <h2 className="mt-3 text-4xl font-black tracking-tight text-white">Technical stack</h2>
-                  <div className="mt-8 grid gap-5 md:grid-cols-2">
-                    {skillGroups.map((group) => (
-                      <div key={group.label} className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
-                        <h3 className="font-mono text-lg font-bold text-amber-200">{group.label}</h3>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          {group.items.map((item) => <span key={item} className="rounded-full bg-[#0d1117] px-3 py-2 text-sm text-slate-300">{item}</span>)}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-
-                <section id="contact" className="border-t border-white/10 px-5 py-10 md:px-8">
-                  <div className="rounded-3xl border border-amber-300/30 bg-amber-300 p-7 text-slate-950 md:p-10">
-                    <p className="font-mono font-bold">terminal</p>
-                    <h2 className="mt-3 text-4xl font-black tracking-tight">Want to collaborate or review my work?</h2>
-                    <div className="mt-6 rounded-2xl bg-slate-950 p-5 font-mono text-sm leading-7 text-slate-100">
-                      <p><span className="text-emerald-300">harshit@portfolio</span>:~$ contact --email</p>
-                      <p className="text-amber-200">harshit.sharma270905@gmail.com</p>
-                      <p><span className="text-emerald-300">harshit@portfolio</span>:~$ location</p>
-                      <p className="text-sky-300">Chennai, India</p>
-                    </div>
-                    <div className="mt-6 flex flex-wrap gap-3">
-                      <a href="mailto:harshit.sharma270905@gmail.com" className="rounded-full bg-slate-950 px-6 py-3 font-bold text-white">Send email</a>
-                      <a href="#" className="rounded-full border border-slate-950 px-6 py-3 font-bold">GitHub</a>
-                      <a href="#" className="rounded-full border border-slate-950 px-6 py-3 font-bold">LinkedIn</a>
-                    </div>
-                  </div>
-                </section>
+            <div className="h-[26vh] min-h-36 shrink-0 border-t border-white/10 bg-[#080c12]">
+              <div className="flex h-8 items-center gap-4 border-b border-white/10 px-3 text-[11px] text-slate-400">
+                <span className="border-b border-sky-300 pb-1 text-sky-200">TERMINAL</span>
+                <span>PROBLEMS 0</span>
+                <span>OUTPUT</span>
+              </div>
+              <div className="h-[calc(100%-2rem)] overflow-auto p-3 font-mono text-[11px] leading-5 text-slate-300">
+                {terminalLines.map((line, index) => (
+                  <div key={`${line}-${index}`} className={line.startsWith("$") ? "text-emerald-300" : "text-slate-300"}>{line}</div>
+                ))}
+                <span className="inline-block h-4 w-2 animate-pulse bg-slate-300 align-middle" />
               </div>
             </div>
-          </div>
+          </section>
         </div>
-      </section>
+      </div>
     </main>
   );
 }
