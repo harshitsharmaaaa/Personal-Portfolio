@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Personal AI Site
 
-## Getting Started
+A polished personal-brand homepage built with **Next.js**, **TypeScript**, and **Tailwind CSS**. The design is inspired by the code/editor energy of hitesh.ai, while using original layout, copy, colors, and components.
 
-First, run the development server:
+## Run locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open <http://localhost:3000>.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+```
 
-## Learn More
+## Customize your content
 
-To learn more about Next.js, take a look at the following resources:
+Edit `src/app/page.tsx` and replace:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `Your Name`
+- `Developer & Creator`
+- `hello@example.com`
+- Hero headline and bio
+- Stats in the `stats` array
+- Work cards in the `work` array
+- Testimonials in the `testimonials` array
+- Social links in the `socials` array
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Edit `src/app/layout.tsx` to update the browser title and SEO description.
 
-## Deploy on Vercel
+## Questions for personalization
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Send me these details and I can wire them into the site:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Your full name
+2. Your role or tagline
+3. Short bio
+4. Email/contact method
+5. Social links
+6. Projects, services, or courses to show
+7. Preferred colors
+8. Profile photo or avatar style
