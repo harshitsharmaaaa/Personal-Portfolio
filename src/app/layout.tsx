@@ -18,7 +18,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Harshit Sharma | Full-Stack & Web3 Developer",
+  title: "Harshit Sharma — Visual Studio Code",
   description:
     "Portfolio of Harshit Sharma, a VIT Chennai CSE AI & Robotics student building Next.js, TypeScript, Web3, blockchain, and AI SaaS products.",
 };

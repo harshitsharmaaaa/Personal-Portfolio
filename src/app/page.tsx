@@ -2,242 +2,180 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-type FileKey = "about.tsx" | "projects.tsx" | "skills.json" | "education.md" | "contact.env";
+type FileKey = "about.tsx" | "projects/crypt.ts" | "projects/solana-notes.ts" | "projects/ai-saas.ts" | "skills.json" | "education.md" | "contact.tsx";
+type FolderKey = "portfolio" | "projects";
 
-type Project = {
-  title: string;
-  description: string;
-  stack: string[];
-  bullets: string[];
-};
-
-const fileTree: { name: FileKey; folder: string }[] = [
-  { folder: "About", name: "about.tsx" },
-  { folder: "Projects", name: "projects.tsx" },
-  { folder: "Skills", name: "skills.json" },
-  { folder: "Education", name: "education.md" },
-  { folder: "Contact", name: "contact.env" },
+const files: { key: FileKey; label: string; icon: string; mode: string; folder?: FolderKey }[] = [
+  { key: "about.tsx", label: "about.tsx", icon: "⚛", mode: "TypeScript React", folder: "portfolio" },
+  { key: "projects/crypt.ts", label: "crypt.ts", icon: "TS", mode: "TypeScript", folder: "projects" },
+  { key: "projects/solana-notes.ts", label: "solana-notes.ts", icon: "TS", mode: "TypeScript", folder: "projects" },
+  { key: "projects/ai-saas.ts", label: "ai-saas.ts", icon: "TS", mode: "TypeScript", folder: "projects" },
+  { key: "skills.json", label: "skills.json", icon: "{}", mode: "JSON", folder: "portfolio" },
+  { key: "education.md", label: "education.md", icon: "MD", mode: "Markdown", folder: "portfolio" },
+  { key: "contact.tsx", label: "contact.tsx", icon: "⚛", mode: "TypeScript React", folder: "portfolio" },
 ];
 
-const projects: Project[] = [
-  {
-    title: "Crypt",
-    description: "Multi-chain HD wallet generator and blockchain explorer for Ethereum + Solana.",
-    stack: ["Next.js", "TypeScript", "ethers.js", "Solana web3.js", "BIP39/BIP44"],
-    bullets: [
-      "Real BIP39/BIP44 cryptographic key derivation from mnemonic phrases.",
-      "Fully client-side architecture so private keys never leave the browser.",
-      "Automatic RPC failover for reliable Ethereum and Solana blockchain queries.",
-    ],
-  },
-  {
-    title: "Solana Notes DApp",
-    description: "Decentralized note-taking app using Anchor smart contracts and PDAs.",
-    stack: ["Next.js", "TypeScript", "Anchor", "Solana", "Phantom"],
-    bullets: [
-      "CRUD operations through Program Derived Addresses.",
-      "Phantom wallet authentication and transaction signing.",
-      "Real-time UI updates from Anchor account queries.",
-    ],
-  },
-  {
-    title: "AI SaaS Platform",
-    description: "Real-time SaaS with billing, messaging, meetings, and event-driven workflows.",
-    stack: ["tRPC", "Drizzle", "PostgreSQL", "Inngest", "Stream.io"],
-    bullets: [
-      "Billing sync reduced to under 2 seconds using Inngest workflows.",
-      "Collaboration support for 25+ concurrent users.",
-      "Authentication, billing, backend services, and Vercel deployment.",
-    ],
-  },
-];
-
-const skills = {
-  programming: ["C++", "JavaScript", "TypeScript", "Solidity", "HTML", "CSS"],
-  frontend_backend: ["React", "Next.js", "Node.js", "tRPC", "Prisma", "Drizzle ORM"],
-  databases_tools: ["PostgreSQL", "MongoDB", "Redis", "Docker", "AWS", "Git", "Vercel", "Bun"],
-  blockchain_crypto: ["Ethereum", "Solana", "Anchor", "HD Wallets", "BIP39", "BIP44", "Ed25519", "ECDSA"],
-};
-
-const terminalBoot = [
+const terminalScript = [
+  "$ pnpm dev --portfolio",
+  "ready - started server on localhost:3000",
   "$ whoami",
-  "Harshit Sharma — full-stack + Web3 developer",
-  "$ cat focus.txt",
-  "Next.js • TypeScript • React • Node.js • Solana • Ethereum • distributed systems",
-  "$ npm run portfolio",
-  "Compiled: about.tsx, projects.tsx, skills.json, education.md, contact.env",
-  "$ contact --email",
-  "harshit.sharma270905@gmail.com",
+  "Harshit Sharma",
+  "$ cat ./contact.tsx",
+  "email: harshit.sharma270905@gmail.com",
+  "location: Chennai, India",
+  "$ git status --short",
+  "M projects/crypt.ts  M skills.json  ✓ available for internships / projects",
 ];
 
-function CodeLine({ n, children }: { n: number; children: React.ReactNode }) {
-  return (
-    <div className="grid grid-cols-[2.5rem_1fr] gap-3 leading-6">
-      <span className="select-none text-right text-[11px] text-slate-600">{n}</span>
-      <div className="min-w-0 text-slate-300">{children}</div>
-    </div>
-  );
+const projectData = {
+  "projects/crypt.ts": {
+    title: "Crypt",
+    stack: ["Next.js", "TypeScript", "ethers.js", "@solana/web3.js", "BIP39", "BIP44"],
+    description: "A privacy-first multi-chain HD wallet generator and blockchain explorer for Ethereum and Solana.",
+    bullets: ["client-side key generation", "12/24 word mnemonic validation", "automatic RPC failover", "private keys never leave browser"],
+    demo: "https://demo.example.com/crypt",
+    github: "https://github.com/harshit/crypt",
+  },
+  "projects/solana-notes.ts": {
+    title: "Note-Taking DApp on Solana",
+    stack: ["Next.js", "TypeScript", "Anchor", "Rust", "Solana", "Phantom"],
+    description: "A decentralized note-taking app powered by Anchor smart contracts and Program Derived Addresses.",
+    bullets: ["PDA-based note accounts", "CRUD through smart contracts", "Phantom wallet signing", "real-time account query updates"],
+    demo: "https://demo.example.com/solana-notes",
+    github: "https://github.com/harshit/solana-notes",
+  },
+  "projects/ai-saas.ts": {
+    title: "AI SaaS Platform",
+    stack: ["Next.js", "tRPC", "Drizzle ORM", "PostgreSQL", "Inngest", "Stream.io"],
+    description: "A production SaaS platform with real-time collaboration, billing, auth, and event-driven backend workflows.",
+    bullets: ["billing sync under 2 seconds", "25+ concurrent users", "meetings and messaging", "Vercel production deployment"],
+    demo: "https://demo.example.com/ai-saas",
+    github: "https://github.com/harshit/ai-saas",
+  },
+} as const;
+
+function Line({ n, children }: { n: number; children: React.ReactNode }) {
+  return <div className="grid grid-cols-[44px_1fr] text-[12px] leading-[22px]"><span className="select-none pr-4 text-right text-[#858585]">{n}</span><code className="min-w-0 whitespace-pre-wrap break-words text-[#d4d4d4]">{children}</code></div>;
+}
+
+function Icon({ children, color = "text-[#569cd6]" }: { children: React.ReactNode; color?: string }) {
+  return <span className={`grid h-4 min-w-4 place-items-center rounded text-[9px] font-bold ${color}`}>{children}</span>;
 }
 
 export default function Home() {
   const [activeFile, setActiveFile] = useState<FileKey>("about.tsx");
-  const [openTabs, setOpenTabs] = useState<FileKey[]>(["about.tsx", "projects.tsx", "skills.json"]);
+  const [openTabs, setOpenTabs] = useState<FileKey[]>(["about.tsx", "projects/crypt.ts", "skills.json"]);
+  const [collapsed, setCollapsed] = useState<Record<FolderKey, boolean>>({ portfolio: false, projects: false });
+  const [explorerOpen, setExplorerOpen] = useState(true);
+  const [terminalOpen, setTerminalOpen] = useState(true);
+  const [mobileExplorer, setMobileExplorer] = useState(false);
   const [terminalLines, setTerminalLines] = useState<string[]>([]);
 
   useEffect(() => {
+    document.title = "Harshit Sharma — Visual Studio Code";
     setTerminalLines([]);
-    terminalBoot.forEach((line, index) => {
-      window.setTimeout(() => {
-        setTerminalLines((current) => [...current, line]);
-      }, index * 220);
-    });
+    terminalScript.forEach((line, i) => setTimeout(() => setTerminalLines((current) => [...current, line]), i * 190));
   }, []);
 
-  const openFile = (file: FileKey) => {
-    setActiveFile(file);
-    setOpenTabs((tabs) => (tabs.includes(file) ? tabs : [...tabs, file]));
+  const current = files.find((file) => file.key === activeFile) ?? files[0];
+
+  const openFile = (key: FileKey) => {
+    setActiveFile(key);
+    setOpenTabs((tabs) => (tabs.includes(key) ? tabs : [...tabs, key]));
+    setMobileExplorer(false);
   };
 
-  const closeTab = (file: FileKey) => {
+  const closeTab = (key: FileKey) => {
     setOpenTabs((tabs) => {
-      const next = tabs.filter((tab) => tab !== file);
-      if (activeFile === file) setActiveFile(next.at(-1) ?? "about.tsx");
+      const next = tabs.filter((tab) => tab !== key);
+      if (activeFile === key) setActiveFile(next.at(-1) ?? "about.tsx");
       return next.length ? next : ["about.tsx"];
     });
   };
 
-  const content = useMemo(() => {
-    if (activeFile === "about.tsx") {
-      return (
-        <div className="p-4 text-[13px] sm:p-5">
-          <CodeLine n={1}><span className="text-purple-300">export default function</span> <span className="text-yellow-200">About</span>() &#123;</CodeLine>
-          <CodeLine n={2}>  <span className="text-purple-300">const</span> profile = &#123;</CodeLine>
-          <CodeLine n={3}>    name: <span className="text-amber-200">&quot;Harshit Sharma&quot;</span>,</CodeLine>
-          <CodeLine n={4}>    role: <span className="text-amber-200">&quot;Full-stack Developer + Web3 Builder&quot;</span>,</CodeLine>
-          <CodeLine n={5}>    college: <span className="text-amber-200">&quot;VIT Chennai, CSE AI & Robotics, 2027&quot;</span>,</CodeLine>
-          <CodeLine n={6}>    stack: [<span className="text-amber-200">&quot;Next.js&quot;</span>, <span className="text-amber-200">&quot;TypeScript&quot;</span>, <span className="text-amber-200">&quot;React&quot;</span>, <span className="text-amber-200">&quot;Node.js&quot;</span>],</CodeLine>
-          <CodeLine n={7}>  &#125;;</CodeLine>
-          <CodeLine n={8}> </CodeLine>
-          <CodeLine n={9}>  <span className="text-slate-500">// Bio</span></CodeLine>
-          <CodeLine n={10}>  <span className="text-emerald-300">return</span> <span className="text-amber-200">&quot;I build products end-to-end, with deep interest in cryptography, distributed systems, and blockchain infrastructure. I like shipping fast, but I also care about understanding the system beneath the abstraction.&quot;</span>;</CodeLine>
-          <CodeLine n={11}>&#125;</CodeLine>
-        </div>
-      );
+  const editor = useMemo(() => {
+    if (activeFile === "about.tsx") return <div className="py-3">
+      <Line n={1}><span className="text-[#569cd6]">import</span> &#123; Builder &#125; <span className="text-[#569cd6]">from</span> <span className="text-[#ce9178]">&quot;@/harshit&quot;</span>;</Line>
+      <Line n={2}> </Line>
+      <Line n={3}><span className="text-[#569cd6]">export const</span> profile: <span className="text-[#4ec9b0]">Builder</span> = &#123;</Line>
+      <Line n={4}>  name: <span className="text-[#ce9178]">&quot;Harshit Sharma&quot;</span>,</Line>
+      <Line n={5}>  education: <span className="text-[#ce9178]">&quot;B.Tech CSE (AI & Robotics), VIT Chennai, 2027&quot;</span>,</Line>
+      <Line n={6}>  role: <span className="text-[#ce9178]">&quot;Full-stack developer with deep Web3 work&quot;</span>,</Line>
+      <Line n={7}>  stack: [<span className="text-[#ce9178]">&quot;Next.js&quot;</span>, <span className="text-[#ce9178]">&quot;TypeScript&quot;</span>, <span className="text-[#ce9178]">&quot;React&quot;</span>, <span className="text-[#ce9178]">&quot;Node.js&quot;</span>],</Line>
+      <Line n={8}>  focus: [<span className="text-[#ce9178]">&quot;cryptography&quot;</span>, <span className="text-[#ce9178]">&quot;distributed systems&quot;</span>, <span className="text-[#ce9178]">&quot;blockchain infrastructure&quot;</span>],</Line>
+      <Line n={9}>  bio: <span className="text-[#ce9178]">&quot;I build products end-to-end, ship fast, and like understanding the system beneath the abstraction.&quot;</span>,</Line>
+      <Line n={10}>&#125;;</Line>
+    </div>;
+
+    if (activeFile.startsWith("projects/")) {
+      const project = projectData[activeFile as keyof typeof projectData];
+      return <div className="py-3">
+        <Line n={1}><span className="text-[#569cd6]">export const</span> project = &#123;</Line>
+        <Line n={2}>  title: <span className="text-[#ce9178]">&quot;{project.title}&quot;</span>,</Line>
+        <Line n={3}>  stack: <span className="text-[#ce9178]">{JSON.stringify(project.stack)}</span>,</Line>
+        <Line n={4}>  description: <span className="text-[#ce9178]">&quot;{project.description}&quot;</span>,</Line>
+        <Line n={5}>  highlights: <span className="text-[#ce9178]">{JSON.stringify(project.bullets)}</span>,</Line>
+        <Line n={6}>  liveDemo: <span className="text-[#ce9178]">&quot;{project.demo}&quot;</span>,</Line>
+        <Line n={7}>  github: <span className="text-[#ce9178]">&quot;{project.github}&quot;</span>,</Line>
+        <Line n={8}>&#125; <span className="text-[#569cd6]">as const</span>;</Line>
+      </div>;
     }
 
-    if (activeFile === "projects.tsx") {
-      return (
-        <div className="grid gap-3 p-4 text-[13px] sm:grid-cols-3 sm:p-5">
-          {projects.map((project) => (
-            <article key={project.title} className="rounded-xl border border-white/10 bg-[#111827] p-4">
-              <div className="mb-3 flex items-start justify-between gap-2">
-                <h2 className="text-base font-bold text-white">{project.title}</h2>
-                <span className="rounded bg-emerald-400/10 px-2 py-1 text-[10px] text-emerald-300">built</span>
-              </div>
-              <p className="text-xs leading-5 text-slate-300">{project.description}</p>
-              <ul className="mt-3 space-y-1.5 text-[11px] leading-5 text-slate-400">
-                {project.bullets.map((bullet) => <li key={bullet}>✓ {bullet}</li>)}
-              </ul>
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {project.stack.map((tech) => <span key={tech} className="rounded border border-white/10 px-2 py-1 text-[10px] text-sky-200">{tech}</span>)}
-              </div>
-            </article>
-          ))}
-        </div>
-      );
-    }
+    if (activeFile === "skills.json") return <pre className="p-4 text-[12px] leading-[22px] text-[#d4d4d4]"><span className="text-[#d4d4d4]">&#123;</span>{"\n"}  <span className="text-[#9cdcfe]">&quot;programming&quot;</span>: <span className="text-[#ce9178]">["C++", "JavaScript", "TypeScript", "Solidity"]</span>,{"\n"}  <span className="text-[#9cdcfe]">&quot;frontend_backend&quot;</span>: <span className="text-[#ce9178]">["React", "Next.js", "Node.js", "tRPC"]</span>,{"\n"}  <span className="text-[#9cdcfe]">&quot;databases"</span>: <span className="text-[#ce9178]">["PostgreSQL", "MongoDB", "Redis"]</span>,{"\n"}  <span className="text-[#9cdcfe]">&quot;tools"</span>: <span className="text-[#ce9178]">["Git", "Docker", "AWS", "Prisma", "Drizzle", "Vercel", "Bun"]</span>,{"\n"}  <span className="text-[#9cdcfe]">&quot;crypto_web3"</span>: <span className="text-[#ce9178]">["Ethereum", "Solana", "Anchor", "BIP39", "BIP44", "Ed25519", "ECDSA"]</span>{"\n"}<span>&#125;</span></pre>;
 
-    if (activeFile === "skills.json") {
-      return (
-        <pre className="overflow-auto p-4 text-[12px] leading-6 text-slate-300 sm:p-5">
-          <span className="text-slate-500">&#123;</span>{"\n"}
-          {Object.entries(skills).map(([key, values], index) => (
-            <span key={key}>  <span className="text-sky-300">&quot;{key}&quot;</span>: <span className="text-amber-200">{JSON.stringify(values)}</span>{index < Object.keys(skills).length - 1 ? "," : ""}{"\n"}</span>
-          ))}
-          <span className="text-slate-500">&#125;</span>
-        </pre>
-      );
-    }
+    if (activeFile === "education.md") return <div className="p-4 text-[13px] leading-7"><p className="text-[#569cd6]"># Education</p><p><span className="text-[#dcdcaa]">VIT Chennai</span></p><p>B.Tech in Computer Science, AI & Robotics</p><p className="text-[#6a9955]">Aug 2023 — May 2027</p><p className="mt-3 text-[#d4d4d4]">Relevant coursework: DAA, Computer Networks, Theory of Computation, Compiler Design, DBMS.</p></div>;
 
-    if (activeFile === "education.md") {
-      return (
-        <div className="p-4 text-[13px] leading-7 text-slate-300 sm:p-5">
-          <h1 className="text-xl font-bold text-white"># Education</h1>
-          <p className="mt-3"><span className="text-amber-200">VIT Chennai</span> — B.Tech Computer Science, AI & Robotics</p>
-          <p>Timeline: Aug 2023 → May 2027</p>
-          <p className="mt-3 text-slate-400">Relevant coursework: Design and Analysis of Algorithms, Computer Networks, Theory of Computation, Compiler Design, Database Management Systems.</p>
-        </div>
-      );
-    }
-
-    return (
-      <div className="p-4 text-[13px] leading-7 sm:p-5">
-        <CodeLine n={1}>EMAIL=<span className="text-amber-200">harshit.sharma270905@gmail.com</span></CodeLine>
-        <CodeLine n={2}>LOCATION=<span className="text-amber-200">Chennai, India</span></CodeLine>
-        <CodeLine n={3}>GITHUB=<span className="text-slate-500">add-your-github-link</span></CodeLine>
-        <CodeLine n={4}>LINKEDIN=<span className="text-slate-500">add-your-linkedin-link</span></CodeLine>
-      </div>
-    );
+    return <div className="py-3">
+      <Line n={1}><span className="text-[#569cd6]">export default function</span> <span className="text-[#dcdcaa]">Contact</span>() &#123;</Line>
+      <Line n={2}>  <span className="text-[#569cd6]">return</span> &#123;</Line>
+      <Line n={3}>    email: <span className="text-[#ce9178]">&quot;harshit.sharma270905@gmail.com&quot;</span>,</Line>
+      <Line n={4}>    phone: <span className="text-[#ce9178]">&quot;+91 9145825568&quot;</span>,</Line>
+      <Line n={5}>    location: <span className="text-[#ce9178]">&quot;Chennai, India&quot;</span>,</Line>
+      <Line n={6}>    github: <span className="text-[#ce9178]">&quot;add-your-github&quot;</span>,</Line>
+      <Line n={7}>    linkedin: <span className="text-[#ce9178]">&quot;add-your-linkedin&quot;</span>,</Line>
+      <Line n={8}>  &#125;;</Line>
+      <Line n={9}>&#125;</Line>
+    </div>;
   }, [activeFile]);
 
-  return (
-    <main className="h-screen overflow-hidden bg-[#0d1117] p-2 text-slate-100 sm:p-3">
-      <div className="mx-auto flex h-full w-full max-w-[1500px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1e1e1e] shadow-2xl">
-        <div className="flex h-9 shrink-0 items-center gap-2 border-b border-white/10 bg-[#181818] px-3">
-          <span className="size-2.5 rounded-full bg-[#ff5f56]" />
-          <span className="size-2.5 rounded-full bg-[#ffbd2e]" />
-          <span className="size-2.5 rounded-full bg-[#27c93f]" />
-          <span className="ml-3 truncate text-[11px] text-slate-400">harshit-sharma-portfolio — VS Code</span>
-        </div>
+  const Explorer = <aside className={`${explorerOpen ? "w-[245px]" : "w-0"} overflow-hidden border-r border-[#3c3c3c] bg-[#252526] transition-all duration-200`}>
+    <div className="flex h-9 items-center justify-between px-4 text-[11px] uppercase tracking-wide text-[#bbbbbb]"><span>Explorer</span><button onClick={() => setExplorerOpen(false)} className="text-[#cccccc]">×</button></div>
+    <div className="px-2 text-[12px] text-[#cccccc]">
+      <button onClick={() => setCollapsed((c) => ({ ...c, portfolio: !c.portfolio }))} className="flex w-full items-center gap-1 py-1 text-left font-bold uppercase"><span>{collapsed.portfolio ? "▸" : "▾"}</span> Portfolio</button>
+      {!collapsed.portfolio && files.filter(f => f.folder === "portfolio").map((file) => <button key={file.key} onClick={() => openFile(file.key)} className={`ml-3 flex w-[calc(100%-0.75rem)] items-center gap-2 px-2 py-1 text-left ${activeFile === file.key ? "bg-[#37373d] text-white" : "hover:bg-[#2a2d2e]"}`}><Icon color={file.icon === "MD" ? "text-[#519aba]" : "text-[#569cd6]"}>{file.icon}</Icon>{file.label}</button>)}
+      <button onClick={() => setCollapsed((c) => ({ ...c, projects: !c.projects }))} className="mt-1 flex w-full items-center gap-1 py-1 text-left font-bold uppercase"><span>{collapsed.projects ? "▸" : "▾"}</span> projects</button>
+      {!collapsed.projects && files.filter(f => f.folder === "projects").map((file) => <button key={file.key} onClick={() => openFile(file.key)} className={`ml-3 flex w-[calc(100%-0.75rem)] items-center gap-2 px-2 py-1 text-left ${activeFile === file.key ? "bg-[#37373d] text-white" : "hover:bg-[#2a2d2e]"}`}><Icon>TS</Icon>{file.label}</button>)}
+    </div>
+  </aside>;
 
-        <div className="grid min-h-0 flex-1 grid-cols-1 sm:grid-cols-[210px_1fr]">
-          <aside className="hidden border-r border-white/10 bg-[#161b22] sm:block">
-            <div className="border-b border-white/10 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Explorer</div>
-            <div className="p-2">
-              {fileTree.map((file) => (
-                <button key={file.name} onClick={() => openFile(file.name)} className={`mb-1 flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[12px] ${activeFile === file.name ? "bg-[#24324a] text-white" : "text-slate-300 hover:bg-white/10"}`}>
-                  <span className="text-sky-300">▸</span>
-                  <span className="truncate">{file.name}</span>
-                </button>
-              ))}
-            </div>
-          </aside>
-
-          <section className="flex min-w-0 flex-col">
-            <div className="flex shrink-0 overflow-x-auto border-b border-white/10 bg-[#111827]">
-              <div className="flex sm:hidden">
-                {fileTree.map((file) => (
-                  <button key={file.name} onClick={() => openFile(file.name)} className="border-r border-white/10 px-3 py-2 text-[11px] text-slate-300">{file.name}</button>
-                ))}
-              </div>
-              {openTabs.map((tab) => (
-                <button key={tab} onClick={() => setActiveFile(tab)} className={`group flex items-center gap-2 border-r border-white/10 px-3 py-2 text-[12px] ${activeFile === tab ? "bg-[#1e1e1e] text-white" : "text-slate-400 hover:bg-white/5"}`}>
-                  <span>{tab}</span>
-                  <span onClick={(event) => { event.stopPropagation(); closeTab(tab); }} className="rounded px-1 text-slate-500 hover:bg-white/10 hover:text-white">×</span>
-                </button>
-              ))}
-            </div>
-
-            <div className="min-h-0 flex-1 overflow-auto bg-[#0d1117]">
-              {content}
-            </div>
-
-            <div className="h-[26vh] min-h-36 shrink-0 border-t border-white/10 bg-[#080c12]">
-              <div className="flex h-8 items-center gap-4 border-b border-white/10 px-3 text-[11px] text-slate-400">
-                <span className="border-b border-sky-300 pb-1 text-sky-200">TERMINAL</span>
-                <span>PROBLEMS 0</span>
-                <span>OUTPUT</span>
-              </div>
-              <div className="h-[calc(100%-2rem)] overflow-auto p-3 font-mono text-[11px] leading-5 text-slate-300">
-                {terminalLines.map((line, index) => (
-                  <div key={`${line}-${index}`} className={line.startsWith("$") ? "text-emerald-300" : "text-slate-300"}>{line}</div>
-                ))}
-                <span className="inline-block h-4 w-2 animate-pulse bg-slate-300 align-middle" />
-              </div>
-            </div>
-          </section>
-        </div>
+  return <main className="h-screen overflow-hidden bg-[#1e1e1e] font-mono text-[#d4d4d4]">
+    <div className="flex h-full flex-col">
+      <div className="flex h-8 shrink-0 items-center border-b border-[#3c3c3c] bg-[#323233] px-3 text-[12px] text-[#cccccc]">
+        <div className="flex gap-2"><span className="h-3 w-3 rounded-full bg-[#ff5f57]"/><span className="h-3 w-3 rounded-full bg-[#febc2e]"/><span className="h-3 w-3 rounded-full bg-[#28c840]"/></div>
+        <div className="mx-auto hidden sm:block">Harshit Sharma — Visual Studio Code</div>
+        <button onClick={() => setMobileExplorer(true)} className="ml-auto sm:hidden">☰</button>
       </div>
-    </main>
-  );
+
+      <div className="min-h-0 flex flex-1">
+        <nav className="hidden w-12 shrink-0 flex-col items-center gap-4 border-r border-[#3c3c3c] bg-[#333333] py-3 text-xl text-[#cccccc] sm:flex"><button onClick={() => setExplorerOpen((v) => !v)} className={explorerOpen ? "text-white" : "text-[#858585]"}>📁</button><span>🔎</span><span>⑂</span><span>🐞</span><span className="mt-auto">⚙</span></nav>
+        <div className={`${mobileExplorer ? "fixed inset-0 z-30 flex sm:hidden" : "hidden"}`}><div className="w-[82vw] bg-[#252526]">{Explorer}</div><button className="flex-1 bg-black/50" onClick={() => setMobileExplorer(false)} /></div>
+        <div className="hidden sm:block">{Explorer}</div>
+
+        <section className="flex min-w-0 flex-1 flex-col bg-[#1e1e1e]">
+          <div className="flex h-9 shrink-0 overflow-x-auto bg-[#252526]">
+            {openTabs.map((tab) => {
+              const file = files.find(f => f.key === tab)!;
+              return <button key={tab} onClick={() => setActiveFile(tab)} className={`group flex min-w-fit items-center gap-2 border-r border-[#3c3c3c] px-3 text-[12px] transition ${activeFile === tab ? "bg-[#1e1e1e] text-white" : "bg-[#2d2d2d] text-[#969696] hover:bg-[#333333]"}`}><Icon color={file.icon === "{}" ? "text-[#f1c40f]" : file.icon === "MD" ? "text-[#519aba]" : "text-[#569cd6]"}>{file.icon}</Icon>{file.label}<span onClick={(e) => { e.stopPropagation(); closeTab(tab); }} className="rounded px-1 opacity-60 hover:bg-[#454545] group-hover:opacity-100">×</span></button>;
+            })}
+          </div>
+          <div className="min-h-0 flex-1 overflow-auto bg-[#1e1e1e]">{editor}</div>
+          {terminalOpen && <div className="h-[190px] min-h-[120px] resize-y overflow-auto border-t border-[#3c3c3c] bg-[#1e1e1e]">
+            <div className="flex h-8 items-center gap-5 border-b border-[#3c3c3c] px-3 text-[11px] text-[#cccccc]"><span className="border-b border-[#007acc] pb-1 text-white">TERMINAL</span><span>OUTPUT</span><span>DEBUG CONSOLE</span><button onClick={() => setTerminalOpen(false)} className="ml-auto">×</button></div>
+            <div className="p-3 text-[12px] leading-5">{terminalLines.map((line, i) => <div key={i} className={line.startsWith("$") ? "text-[#4ec9b0]" : "text-[#d4d4d4]"}>{line}</div>)}<span className="inline-block h-4 w-2 animate-pulse bg-[#d4d4d4]" /></div>
+          </div>}
+        </section>
+      </div>
+      <div className="flex h-6 shrink-0 items-center gap-4 bg-[#007acc] px-2 text-[11px] text-white"><span>⑂ main</span><span>✓ synced</span><span>{current.mode}</span><span>Ln 1, Col 1</span><button onClick={() => setTerminalOpen(true)} className="ml-auto">Terminal</button></div>
+    </div>
+  </main>;
 }
