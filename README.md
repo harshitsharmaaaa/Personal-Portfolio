@@ -309,18 +309,7 @@ npm start
 
 The app runs on port 3000 by default. Set `PORT=<n>` to override.
 
----
 
-## Contact
-
-**Harshit Sharma**
-
-- Email: `harshit.sharma270905@gmail.com`
-- Phone: `+91 9145825568`
-- Location: Chennai, India
-- Education: B.Tech CSE (AI & Robotics), VIT Chennai (2023–2027)
-
----
 
 ## License
 
