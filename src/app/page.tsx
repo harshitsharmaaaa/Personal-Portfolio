@@ -85,6 +85,8 @@ export default function Home() {
   const [theme, setTheme] = useState<Theme>("dark");
   const [context, setContext] = useState<{ x: number; y: number; file: FileKey } | null>(null);
   const [mobilePanel, setMobilePanel] = useState(false);
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const resizing = useRef<"sidebar" | "terminal" | null>(null);
 
   useEffect(() => {
@@ -126,10 +128,17 @@ export default function Home() {
       if (resizing.current === "terminal") setTerminalHeight(Math.min(420, Math.max(100, window.innerHeight - event.clientY - 24)));
     };
     const onUp = () => { resizing.current = null; };
+    const onDocumentClick = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        const target = event.target as HTMLElement;
+        if (!target.closest("[data-menu-trigger]")) setActiveMenu(null);
+      }
+    };
     window.addEventListener("keydown", onKey);
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
-    return () => { window.removeEventListener("keydown", onKey); window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
+    document.addEventListener("mousedown", onDocumentClick);
+    return () => { window.removeEventListener("keydown", onKey); window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); document.removeEventListener("mousedown", onDocumentClick); };
   }, []);
 
   const openFile = (file: FileKey) => {
@@ -173,6 +182,8 @@ export default function Home() {
         <button onClick={() => setMobilePanel(true)} className="ml-auto md:hidden">☰</button>
       </header>
 
+      <MenuBar activeMenu={activeMenu} setActiveMenu={setActiveMenu} menuRef={menuRef} explorerOpen={explorerOpen} setExplorerOpen={setExplorerOpen} terminalOpen={terminalOpen} setTerminalOpen={setTerminalOpen} paletteOpen={paletteOpen} setPaletteOpen={setPaletteOpen} setPaletteQuery={setPaletteQuery} theme={theme} setTheme={setTheme} />
+
       <div className="min-h-0 flex flex-1">
         <nav className="hidden w-12 shrink-0 flex-col items-center border-r border-[#3c3c3c] bg-[#333333] py-2 text-[20px] text-[#858585] md:flex">
           {([ ["explorer","📁"], ["search","🔎"], ["source","⑂"], ["extensions","▦"] ] as [Activity,string][]).map(([key, icon]) => <button key={key} onClick={() => { setActivity(key); setExplorerOpen(true); }} className={`mb-3 w-full border-l-2 py-1 ${activity === key ? "border-white text-white" : "border-transparent hover:text-[#cccccc]"}`}>{icon}</button>)}
@@ -213,6 +224,93 @@ function PanelTitle({ title }: { title: string }) { return <div className="h-9 p
 function Folder({ name, open, toggle }: { name: string; open: boolean; toggle: () => void }) { return <button onClick={toggle} className="flex w-full items-center gap-1 py-1 text-left font-bold uppercase text-[#cccccc]"><span>{open ? "▾" : "▸"}</span>{name}</button>; }
 function FileRow({ file, active, openFile }: { file: FileKey; active: boolean; openFile: (f: FileKey) => void }) { return <button onClick={() => openFile(file)} className={`ml-3 flex w-[calc(100%-0.75rem)] items-center gap-2 px-2 py-1 text-left ${active ? "bg-[#37373d] text-white" : "text-[#cccccc] hover:bg-[#2a2d2e]"}`}><FileIcon file={file}/>{fileMeta[file].label}</button>; }
 function Minimap({ file }: { file: FileKey }) { return <aside className="hidden border-l border-[#2b2b2b] bg-[#1e1e1e] p-2 opacity-70 lg:block">{Array.from({ length: 38 }).map((_, i) => <div key={i} className={`mb-1 h-1 rounded ${i % 5 === 0 ? "bg-[#569cd6]" : i % 3 === 0 ? "bg-[#ce9178]" : "bg-[#6a9955]"}`} style={{ width: `${30 + ((i * file.length) % 44)}px` }}/>)}</aside>; }
+
+const menuItems: Record<string, { label: string; shortcut?: string; action?: () => void; submenu?: string }[]> = {
+  File: [
+    { label: "New File", shortcut: "Ctrl+N" },
+    { label: "Open File...", shortcut: "Ctrl+O" },
+    { label: "Save", shortcut: "Ctrl+S" },
+    { label: "Save All", shortcut: "Ctrl+Shift+S" },
+    { label: "---" },
+    { label: "Preferences", shortcut: "Ctrl+,", submenu: "preferences" },
+  ],
+  Edit: [
+    { label: "Undo", shortcut: "Ctrl+Z" },
+    { label: "Redo", shortcut: "Ctrl+Shift+Z" },
+    { label: "---" },
+    { label: "Cut", shortcut: "Ctrl+X" },
+    { label: "Copy", shortcut: "Ctrl+C" },
+    { label: "Paste", shortcut: "Ctrl+V" },
+    { label: "---" },
+    { label: "Find", shortcut: "Ctrl+F" },
+    { label: "Replace", shortcut: "Ctrl+H" },
+  ],
+  Selection: [
+    { label: "Select All", shortcut: "Ctrl+A" },
+    { label: "Copy Line Up", shortcut: "Ctrl+Shift+↑" },
+    { label: "Copy Line Down", shortcut: "Ctrl+Shift+↓" },
+  ],
+  View: [
+    { label: "Command Palette", shortcut: "Ctrl+Shift+P" },
+    { label: "Quick Open", shortcut: "Ctrl+P" },
+    { label: "---" },
+    { label: "Toggle Sidebar", shortcut: "Ctrl+B" },
+    { label: "Toggle Panel", shortcut: "Ctrl+J" },
+    { label: "Appearance", submenu: "appearance" },
+    { label: "---" },
+    { label: "Reload", shortcut: "Ctrl+R" },
+  ],
+  Go: [
+    { label: "Go to File...", shortcut: "Ctrl+P" },
+    { label: "Go to Definition", shortcut: "F12" },
+    { label: "Go Back", shortcut: "Alt+←" },
+    { label: "Go Forward", shortcut: "Alt+→" },
+  ],
+  Run: [
+    { label: "Start Debugging", shortcut: "F5" },
+    { label: "Run Without Debugging", shortcut: "Ctrl+F5" },
+    { label: "Toggle Breakpoint", shortcut: "F9" },
+  ],
+  Terminal: [
+    { label: "New Terminal", shortcut: "Ctrl+`" },
+    { label: "Toggle Terminal", shortcut: "Ctrl+J" },
+    { label: "---" },
+    { label: "Run Task...", shortcut: "Ctrl+Shift+B" },
+  ],
+  Help: [
+    { label: "Welcome", shortcut: "" },
+    { label: "---" },
+    { label: "Check for Updates", shortcut: "" },
+    { label: "About", shortcut: "" },
+  ],
+};
+
+function MenuBar({ activeMenu, setActiveMenu, menuRef, explorerOpen, setExplorerOpen, terminalOpen, setTerminalOpen, paletteOpen, setPaletteOpen, setPaletteQuery, theme, setTheme }: { activeMenu: string | null; setActiveMenu: (m: string | null) => void; menuRef: React.RefObject<HTMLDivElement | null>; explorerOpen: boolean; setExplorerOpen: (v: boolean) => void; terminalOpen: boolean; setTerminalOpen: (v: boolean) => void; paletteOpen: boolean; setPaletteOpen: (v: boolean) => void; setPaletteQuery: (q: string) => void; theme: Theme; setTheme: (t: Theme) => void }) {
+  const menus = ["File", "Edit", "Selection", "View", "Go", "Run", "Terminal", "Help"];
+  return <nav ref={menuRef} className="flex h-9 shrink-0 items-center gap-1 border-b border-[#3c3c3c] bg-[#323233] px-2 text-[12px] text-[#cccccc]">
+    {menus.map((menu) => <div key={menu} className="relative">
+      <button data-menu-trigger onClick={() => setActiveMenu(activeMenu === menu ? null : menu)} className={`px-2.5 py-1 rounded ${activeMenu === menu ? "bg-[#0e639c] text-white" : "hover:bg-[#3c3c3c]"}`}>{menu}</button>
+      {activeMenu === menu && <Dropdown menu={menu} items={menuItems[menu]} explorerOpen={explorerOpen} setExplorerOpen={setExplorerOpen} terminalOpen={terminalOpen} setTerminalOpen={setTerminalOpen} paletteOpen={paletteOpen} setPaletteOpen={setPaletteOpen} setPaletteQuery={setPaletteQuery} theme={theme} setTheme={setTheme} setActiveMenu={setActiveMenu} />}
+    </div>)}
+  </nav>;
+}
+
+function Dropdown({ menu, items, explorerOpen, setExplorerOpen, terminalOpen, setTerminalOpen, paletteOpen, setPaletteOpen, setPaletteQuery, theme, setTheme, setActiveMenu }: { menu: string; items: { label: string; shortcut?: string; action?: () => void; submenu?: string }[]; explorerOpen: boolean; setExplorerOpen: (v: boolean) => void; terminalOpen: boolean; setTerminalOpen: (v: boolean) => void; paletteOpen: boolean; setPaletteOpen: (v: boolean) => void; setPaletteQuery: (q: string) => void; theme: Theme; setTheme: (t: Theme) => void; setActiveMenu: (m: string | null) => void }) {
+  const runAction = (item: { label: string; shortcut?: string; action?: () => void; submenu?: string }) => {
+    if (item.label === "Toggle Sidebar") setExplorerOpen(!explorerOpen);
+    else if (item.label === "Toggle Panel") setTerminalOpen(!terminalOpen);
+    else if (item.label === "Command Palette") { setPaletteOpen(true); setPaletteQuery(""); }
+    else if (item.label === "Quick Open" || item.label === "Go to File...") { setPaletteOpen(true); setPaletteQuery(""); }
+    else if (item.label === "New Terminal" || item.label === "Toggle Terminal") setTerminalOpen(true);
+    else if (item.label === "Preferences" || item.label === "Appearance") setActiveMenu("preferences");
+    else if (item.label === "Toggle Color Theme") setTheme(theme === "dark" ? "light" : "dark");
+    item.action?.();
+  };
+  return <div className="absolute top-9 left-0 z-50 min-w-52 overflow-hidden rounded-md border border-[#454545] bg-[#252526] py-1 text-[12px] shadow-xl">
+    {items.map((item, index) => item.label === "---" ? <div key={index} className="h-px bg-[#3c3c3c] my-1"></div> : <button key={item.label} onClick={() => runAction(item)} className="flex w-full items-center justify-between px-3 py-1.5 text-left hover:bg-[#094771]"><span>{item.label}</span>{item.shortcut && <span className="text-[#858585]">{item.shortcut}</span>}</button>)}
+  </div>;
+}
+
 
 function renderEditor(activeFile: FileKey, setPreview: (p: Project) => void) {
   if (activeFile === "about.tsx") return <div className="py-3"><Line n={1}><span className="text-[#569cd6]">import</span> &#123; Builder &#125; <span className="text-[#569cd6]">from</span> <span className="text-[#ce9178]">&quot;@/harshit&quot;</span>;</Line><Line n={2}> </Line><Line n={3} active><span className="text-[#569cd6]">export const</span> profile: <span className="text-[#4ec9b0]">Builder</span> = &#123;</Line><Line n={4}>  name: <span className="text-[#ce9178]">&quot;Harshit Sharma&quot;</span>,</Line><Line n={5}>  education: <span className="text-[#ce9178]">&quot;B.Tech CSE (AI & Robotics), VIT Chennai, 2027&quot;</span>,</Line><Line n={6}>  role: <span className="text-[#ce9178]">&quot;Full-stack developer with deep Web3 work&quot;</span>,</Line><Line n={7}>  bio: <span className="text-[#ce9178]">&quot;I build products end-to-end with Next.js, TypeScript, React, Node.js, and blockchain systems.&quot;</span>,</Line><Line n={8}>  values: [<span className="text-[#ce9178]">&quot;ship fast&quot;</span>, <span className="text-[#ce9178]">&quot;understand deeply&quot;</span>, <span className="text-[#ce9178]">&quot;avoid unnecessary process&quot;</span>],</Line><Line n={9}>&#125;;<span className="ml-1 inline-block h-4 w-2 animate-pulse bg-[#d4d4d4] align-middle" /></Line></div>;
