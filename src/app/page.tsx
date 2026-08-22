@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-type FileKey = "about.tsx" | "projects/crypt.ts" | "projects/solana-notes.ts" | "projects/ai-saas.ts" | "skills.json" | "education.md" | "contact.tsx";
+type FileKey = "about.tsx" | "projects/crypt.ts" | "projects/solana-notes.ts" | "projects/ai-work-flow.ts" | "projects/rate-limiter.ts" | "skills.json" | "education.md" | "contact.tsx";
 type FolderKey = "portfolio" | "projects";
 type Activity = "explorer" | "search" | "source" | "extensions";
 type Theme = "dark" | "light";
@@ -14,15 +14,17 @@ type Project = {
   highlights: string[];
   demo: string;
   github: string;
+  npm?: string;
 };
 
 const STORAGE_KEY = "harshit-vscode-state-v2";
 
 const fileMeta: Record<FileKey, { label: string; icon: string; mode: string; folder: FolderKey; color: string }> = {
   "about.tsx": { label: "about.tsx", icon: "⚛", mode: "TypeScript React", folder: "portfolio", color: "text-[#61dafb]" },
+  "projects/ai-work-flow.ts": { label: "ai-work-flow.ts", icon: "TS", mode: "TypeScript", folder: "projects", color: "text-[#3178c6]" },
   "projects/crypt.ts": { label: "crypt.ts", icon: "TS", mode: "TypeScript", folder: "projects", color: "text-[#3178c6]" },
+  "projects/rate-limiter.ts": { label: "rate-limiter.ts", icon: "TS", mode: "TypeScript", folder: "projects", color: "text-[#3178c6]" },
   "projects/solana-notes.ts": { label: "solana-notes.ts", icon: "TS", mode: "TypeScript", folder: "projects", color: "text-[#3178c6]" },
-  "projects/ai-saas.ts": { label: "ai-saas.ts", icon: "TS", mode: "TypeScript", folder: "projects", color: "text-[#3178c6]" },
   "skills.json": { label: "skills.json", icon: "{}", mode: "JSON", folder: "portfolio", color: "text-[#f1c40f]" },
   "education.md": { label: "education.md", icon: "MD", mode: "Markdown", folder: "portfolio", color: "text-[#519aba]" },
   "contact.tsx": { label: "contact.tsx", icon: "⚛", mode: "TypeScript React", folder: "portfolio", color: "text-[#61dafb]" },
@@ -31,29 +33,109 @@ const fileMeta: Record<FileKey, { label: string; icon: string; mode: string; fol
 const allFiles = Object.keys(fileMeta) as FileKey[];
 
 const projects: Record<Extract<FileKey, `projects/${string}`>, Project> = {
+  "projects/ai-work-flow.ts": {
+    title: "AI Work Flow — AI Workflow Automation Platform",
+    stack: [
+      "Next.js 16",
+      "React 19",
+      "TypeScript",
+      "React Flow",
+      "Liveblocks",
+      "Trigger.dev",
+      "Browserbase",
+      "Stagehand",
+      "Clerk",
+      "Drizzle ORM",
+      "Neon PostgreSQL",
+    ],
+    description: "Visual drag-and-drop workflow editor with real-time multi-user editing, graph validation, topological execution, retries, execution history, asynchronous background jobs, browser automation with AI-driven web interaction, structured data extraction, browser replay, organization authentication, billing, and workflow persistence.",
+    highlights: [
+      "Visual drag-and-drop workflow editor",
+      "React Flow with Liveblocks real-time sync",
+      "Multi-user editing with node dependency management",
+      "Trigger.dev for async background jobs",
+      "Graph validation and topological execution with retries",
+      "Execution history",
+      "Browserbase + Stagehand for AI browser automation",
+      "Structured data extraction and browser replay",
+      "Clerk org auth + billing",
+      "Drizzle ORM + Neon PostgreSQL persistence",
+    ],
+    demo: "https://aiwork-flow.netlify.app/",
+    github: "https://github.com/harshitsharmaaaa/ai-work-flow",
+  },
   "projects/crypt.ts": {
-    title: "Crypt",
-    stack: ["Next.js", "TypeScript", "ethers.js", "@solana/web3.js", "BIP39", "BIP44"],
-    description: "Privacy-first multi-chain HD wallet generator and blockchain explorer for Ethereum and Solana.",
-    highlights: ["Client-side key generation", "12/24 word mnemonic validation", "RPC failover", "Private keys never leave browser"],
-    demo: "https://demo.example.com/crypt",
-    github: "https://github.com/harshit/crypt",
+    title: "Crypt — Multi-Chain HD Wallet Generator & Blockchain Explorer",
+    stack: [
+      "Ethereum",
+      "Solana",
+      "TypeScript",
+      "BIP39",
+      "BIP44",
+      "Ed25519",
+      "ECDSA",
+      "ENS",
+      "ethers.js",
+      "@solana/web3.js",
+    ],
+    description: "Privacy-first multi-chain HD wallet generator and blockchain explorer for Ethereum and Solana. Private keys never leave the browser. Features client-side cryptography, secure mnemonic validation, deterministic wallet recovery, ENS resolution, RPC failover, and resilient public RPC endpoints.",
+    highlights: [
+      "Client-side key generation - private keys never leave browser",
+      "BIP39/BIP44 compliant mnemonic validation",
+      "Ed25519 (Solana) and ECDSA (Ethereum) support",
+      "ENS resolution and RPC failover",
+      "Deterministic wallet recovery",
+      "Resilient public RPC endpoints",
+      "Blockchain explorer for both chains",
+    ],
+    demo: "https://crypt-block.netlify.app/",
+    github: "https://github.com/harshitsharmaaaa/Crypt",
+  },
+  "projects/rate-limiter.ts": {
+    title: "RateLimiter — Rate-Limiting API & Published npm SDK",
+    stack: [
+      "TypeScript",
+      "Fastify",
+      "Prisma",
+      "Redis",
+      "PostgreSQL",
+      "Docker Compose",
+      "JWT",
+    ],
+    description: "Production-grade rate-limiting API with multiple algorithms and a published npm SDK. Supports Fixed Window, Sliding Window, Token Bucket, and Leaky Bucket algorithms with JWT authentication, SHA-256 API key hashing, API key management, comprehensive analytics endpoints, timeline/status/performance/per-endpoint analytics, Prisma migrations, and health checks.",
+    highlights: [
+      "4 algorithms: Fixed Window, Sliding Window, Token Bucket, Leaky Bucket",
+      "JWT authentication with SHA-256 API key hashing",
+      "API key enable/disable/regenerate",
+      "Analytics: timeline, status, performance, per-endpoint",
+      "Prisma migrations and health checks",
+      "Published npm SDK: ratelimiter-sdk",
+      "Docker Compose for local development",
+    ],
+    demo: "",
+    github: "https://github.com/harshitsharmaaaa/Rate-Limiter",
+    npm: "https://www.npmjs.com/package/ratelimiter-sdk",
   },
   "projects/solana-notes.ts": {
     title: "Note-Taking DApp on Solana",
-    stack: ["Next.js", "TypeScript", "Anchor", "Rust", "Solana", "Phantom"],
-    description: "Decentralized note-taking application using Anchor smart contracts and Program Derived Addresses.",
-    highlights: ["PDA note accounts", "CRUD via smart contracts", "Phantom signing", "Real-time account query updates"],
-    demo: "https://demo.example.com/solana-notes",
-    github: "https://github.com/harshit/solana-notes",
-  },
-  "projects/ai-saas.ts": {
-    title: "AI SaaS Platform",
-    stack: ["Next.js", "tRPC", "Drizzle ORM", "PostgreSQL", "Inngest", "Stream.io"],
-    description: "Production SaaS platform with real-time collaboration, billing, auth, and event-driven backend workflows.",
-    highlights: ["Billing sync under 2 seconds", "25+ concurrent users", "Meetings and messaging", "Vercel deployment"],
-    demo: "https://demo.example.com/ai-saas",
-    github: "https://github.com/harshit/ai-saas",
+    stack: [
+      "Next.js",
+      "Anchor",
+      "Solana",
+      "Rust",
+      "Phantom Wallet",
+      "@solana/web3.js",
+    ],
+    description: "Fully on-chain note-taking decentralized application built with Anchor smart contracts. Features Program Derived Addresses for note accounts, full CRUD operations via smart contracts, Phantom Wallet authentication, and real-time blockchain state synchronization via Solana RPC APIs.",
+    highlights: [
+      "Program Derived Addresses for note accounts",
+      "Fully on-chain CRUD via Anchor smart contracts",
+      "Phantom Wallet authentication",
+      "Solana RPC APIs for state sync",
+      "Real-time account query updates",
+    ],
+    demo: "https://note-dapp.netlify.app/",
+    github: "https://github.com/harshitsharmaaaa/noteTaking-Dapp",
   },
 };
 
@@ -70,7 +152,7 @@ function FileIcon({ file }: { file: FileKey }) {
 
 export default function Home() {
   const [activeFile, setActiveFile] = useState<FileKey>("about.tsx");
-  const [openTabs, setOpenTabs] = useState<FileKey[]>(["about.tsx", "projects/crypt.ts", "skills.json"]);
+  const [openTabs, setOpenTabs] = useState<FileKey[]>(["about.tsx", "projects/ai-work-flow.ts", "skills.json"]);
   const [activity, setActivity] = useState<Activity>("explorer");
   const [explorerOpen, setExplorerOpen] = useState(true);
   const [terminalOpen, setTerminalOpen] = useState(true);
@@ -161,7 +243,7 @@ export default function Home() {
     if (!cmd) return;
     const response = cmd.includes("whoami") ? ["Harshit Sharma — CS AI & Robotics @ VIT Chennai"]
       : cmd.includes("contact") ? ["email: harshit.sharma270905@gmail.com", "phone: +91 9145825568", "location: Chennai, India"]
-      : cmd.includes("git status") ? ["On branch main", "Changes: portfolio polished into VS Code Dark+ simulator", "No runtime errors detected"]
+      : cmd.includes("git status") ? ["On branch main", "Changes: AI Work Flow featured, RateLimiter added, all project URLs verified", "No runtime errors detected"]
       : cmd.includes("help") ? ["Commands: whoami, contact, git status, open about.tsx, open skills.json, theme"]
       : cmd.startsWith("open ") ? (allFiles.includes(cmd.replace("open ", "") as FileKey) ? (openFile(cmd.replace("open ", "") as FileKey), [`Opened ${cmd.replace("open ", "")}`]) : ["File not found"])
       : cmd.includes("theme") ? (setTheme((t) => t === "dark" ? "light" : "dark"), ["Theme toggled"])
@@ -209,15 +291,15 @@ export default function Home() {
 
     {paletteOpen && <div className="fixed inset-0 z-50 bg-black/30 pt-16"><div className="mx-auto w-[min(680px,92vw)] overflow-hidden rounded-md border border-[#454545] bg-[#252526] shadow-2xl"><input autoFocus aria-label="Command palette" value={paletteQuery} onChange={(e) => setPaletteQuery(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && paletteItems[0]) openFile(paletteItems[0]); }} className="w-full border-b border-[#3c3c3c] bg-[#3c3c3c] px-4 py-3 text-sm outline-none" placeholder="Type a file name or command..." />{paletteItems.map((file) => <button key={file} onClick={() => openFile(file)} className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-[#094771]"><FileIcon file={file}/>{file}</button>)}<button onClick={() => setTheme((t) => t === "dark" ? "light" : "dark")} className="flex w-full px-4 py-2 text-left text-sm hover:bg-[#094771]">Toggle Color Theme</button></div></div>}
     {context && <div className="fixed z-50 w-44 rounded border border-[#454545] bg-[#252526] py-1 text-[12px] shadow-xl" style={{ left: context.x, top: context.y }}><button onClick={() => closeTab(context.file)} className="block w-full px-3 py-1.5 text-left hover:bg-[#094771]">Close</button><button onClick={() => setOpenTabs([context.file])} className="block w-full px-3 py-1.5 text-left hover:bg-[#094771]">Close Others</button><button onClick={() => navigator.clipboard?.writeText(context.file)} className="block w-full px-3 py-1.5 text-left hover:bg-[#094771]">Copy Path</button></div>}
-    {preview && <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4"><div className="max-w-xl rounded-lg border border-[#3c3c3c] bg-[#252526] p-5 shadow-2xl"><div className="mb-3 flex items-center justify-between"><h2 className="text-lg font-bold text-white">{preview.title}</h2><button onClick={() => setPreview(null)}>×</button></div><p className="text-sm leading-6 text-[#d4d4d4]">{preview.description}</p><div className="mt-4 flex flex-wrap gap-2">{preview.stack.map((s) => <span key={s} className="rounded bg-[#37373d] px-2 py-1 text-xs">{s}</span>)}</div><div className="mt-5 flex gap-3"><a href={preview.demo} className="rounded bg-[#007acc] px-3 py-2 text-sm text-white">Live demo</a><a href={preview.github} className="rounded border border-[#555] px-3 py-2 text-sm">GitHub</a></div></div></div>}
+    {preview && <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4"><div className="max-w-xl rounded-lg border border-[#3c3c3c] bg-[#252526] p-5 shadow-2xl"><div className="mb-3 flex items-center justify-between"><h2 className="text-lg font-bold text-white">{preview.title}</h2><button onClick={() => setPreview(null)}>×</button></div><p className="text-sm leading-6 text-[#d4d4d4]">{preview.description}</p><div className="mt-4 flex flex-wrap gap-2">{preview.stack.map((s) => <span key={s} className="rounded bg-[#37373d] px-2 py-1 text-xs">{s}</span>)}</div><div className="mt-5 flex gap-3">{preview.demo && <a href={preview.demo} target="_blank" rel="noopener noreferrer" className="rounded bg-[#007acc] px-3 py-2 text-sm text-white">Live demo</a>}<a href={preview.github} target="_blank" rel="noopener noreferrer" className="rounded border border-[#555] px-3 py-2 text-sm">GitHub</a>{preview.npm && <a href={preview.npm} target="_blank" rel="noopener noreferrer" className="rounded border border-[#555] px-3 py-2 text-sm">npm</a>}</div></div></div>}
   </main>;
 }
 
 function SidePanel({ activity, activeFile, openFile, folders, setFolders }: { activity: Activity; activeFile: FileKey; openFile: (f: FileKey) => void; folders: Record<FolderKey, boolean>; setFolders: React.Dispatch<React.SetStateAction<Record<FolderKey, boolean>>> }) {
   if (activity === "search") return <aside className="h-full border-r border-[#3c3c3c] bg-[#252526]"><PanelTitle title="Search"/><div className="p-3"><input className="w-full border border-[#3c3c3c] bg-[#3c3c3c] px-2 py-1 text-[12px] outline-none" placeholder="Search Harshit portfolio"/><p className="mt-3 text-[12px] text-[#858585]">3 results in projects, skills, contact.</p></div></aside>;
-  if (activity === "source") return <aside className="h-full border-r border-[#3c3c3c] bg-[#252526]"><PanelTitle title="Source Control"/><div className="p-3 text-[12px]"><p className="mb-2 text-[#cccccc]">CHANGES</p>{["about.tsx", "projects/crypt.ts", "skills.json"].map((f) => <p key={f} className="py-1 text-[#d4d4d4]">M {f}</p>)}</div></aside>;
+  if (activity === "source") return <aside className="h-full border-r border-[#3c3c3c] bg-[#252526]"><PanelTitle title="Source Control"/><div className="p-3 text-[12px]"><p className="mb-2 text-[#cccccc]">CHANGES</p>{["about.tsx", "projects/ai-work-flow.ts", "projects/rate-limiter.ts", "skills.json"].map((f) => <p key={f} className="py-1 text-[#d4d4d4]">M {f}</p>)}</div></aside>;
   if (activity === "extensions") return <aside className="h-full border-r border-[#3c3c3c] bg-[#252526]"><PanelTitle title="Extensions"/><div className="space-y-2 p-3 text-[12px]"><p>✓ TypeScript</p><p>✓ Tailwind CSS IntelliSense</p><p>✓ Solidity</p><p>✓ Rust Analyzer</p></div></aside>;
-  return <aside className="h-full border-r border-[#3c3c3c] bg-[#252526]"><PanelTitle title="Explorer"/><div className="px-2 text-[12px]"><Folder name="PORTFOLIO" open={folders.portfolio} toggle={() => setFolders((f) => ({ ...f, portfolio: !f.portfolio }))}/>{folders.portfolio && (["about.tsx", "skills.json", "education.md", "contact.tsx"] as FileKey[]).map((file) => <FileRow key={file} file={file} active={activeFile === file} openFile={openFile}/>)}<Folder name="PROJECTS" open={folders.projects} toggle={() => setFolders((f) => ({ ...f, projects: !f.projects }))}/>{folders.projects && (["projects/crypt.ts", "projects/solana-notes.ts", "projects/ai-saas.ts"] as FileKey[]).map((file) => <FileRow key={file} file={file} active={activeFile === file} openFile={openFile}/>)}</div></aside>;
+  return <aside className="h-full border-r border-[#3c3c3c] bg-[#252526]"><PanelTitle title="Explorer"/><div className="px-2 text-[12px]"><Folder name="PORTFOLIO" open={folders.portfolio} toggle={() => setFolders((f) => ({ ...f, portfolio: !f.portfolio }))}/>{folders.portfolio && (["about.tsx", "skills.json", "education.md", "contact.tsx"] as FileKey[]).map((file) => <FileRow key={file} file={file} active={activeFile === file} openFile={openFile}/>)}<Folder name="PROJECTS" open={folders.projects} toggle={() => setFolders((f) => ({ ...f, projects: !f.projects }))}/>{folders.projects && (["projects/ai-work-flow.ts", "projects/crypt.ts", "projects/rate-limiter.ts", "projects/solana-notes.ts"] as FileKey[]).map((file) => <FileRow key={file} file={file} active={activeFile === file} openFile={openFile}/>)}</div></aside>;
 }
 
 function PanelTitle({ title }: { title: string }) { return <div className="h-9 px-4 py-2 text-[11px] uppercase tracking-wide text-[#bbbbbb]">{title}</div>; }
@@ -313,9 +395,9 @@ function Dropdown({ menu, items, explorerOpen, setExplorerOpen, terminalOpen, se
 
 
 function renderEditor(activeFile: FileKey, setPreview: (p: Project) => void) {
-  if (activeFile === "about.tsx") return <div className="py-3"><Line n={1}><span className="text-[#569cd6]">import</span> &#123; Builder &#125; <span className="text-[#569cd6]">from</span> <span className="text-[#ce9178]">&quot;@/harshit&quot;</span>;</Line><Line n={2}> </Line><Line n={3} active><span className="text-[#569cd6]">export const</span> profile: <span className="text-[#4ec9b0]">Builder</span> = &#123;</Line><Line n={4}>  name: <span className="text-[#ce9178]">&quot;Harshit Sharma&quot;</span>,</Line><Line n={5}>  education: <span className="text-[#ce9178]">&quot;B.Tech CSE (AI & Robotics), VIT Chennai, 2027&quot;</span>,</Line><Line n={6}>  role: <span className="text-[#ce9178]">&quot;Full-stack developer with deep Web3 work&quot;</span>,</Line><Line n={7}>  bio: <span className="text-[#ce9178]">&quot;I build products end-to-end with Next.js, TypeScript, React, Node.js, and blockchain systems.&quot;</span>,</Line><Line n={8}>  values: [<span className="text-[#ce9178]">&quot;ship fast&quot;</span>, <span className="text-[#ce9178]">&quot;understand deeply&quot;</span>, <span className="text-[#ce9178]">&quot;avoid unnecessary process&quot;</span>],</Line><Line n={9}>&#125;;<span className="ml-1 inline-block h-4 w-2 animate-pulse bg-[#d4d4d4] align-middle" /></Line></div>;
-  if (activeFile.startsWith("projects/")) { const p = projects[activeFile as keyof typeof projects]; return <div className="py-3"><Line n={1}><span className="text-[#569cd6]">export const</span> project = &#123;</Line><Line n={2}>  title: <span className="text-[#ce9178]">&quot;{p.title}&quot;</span>,</Line><Line n={3}>  stack: <span className="text-[#ce9178]">{JSON.stringify(p.stack)}</span>,</Line><Line n={4}>  description: <span className="text-[#ce9178]">&quot;{p.description}&quot;</span>,</Line><Line n={5}>  highlights: <span className="text-[#ce9178]">{JSON.stringify(p.highlights)}</span>,</Line><Line n={6}>  liveDemo: <span className="text-[#ce9178]">&quot;{p.demo}&quot;</span>,</Line><Line n={7}>  github: <span className="text-[#ce9178]">&quot;{p.github}&quot;</span>,</Line><Line n={8}>&#125; <span className="text-[#569cd6]">as const</span>;</Line><div className="ml-12 mt-4"><button onClick={() => setPreview(p)} className="rounded bg-[#007acc] px-3 py-1.5 text-[12px] text-white hover:bg-[#0e86d4]">Open Preview</button></div></div>; }
-  if (activeFile === "skills.json") return <pre className="p-4 text-[12px] leading-[22px]"><span>&#123;</span>{"\n"}  <span className="text-[#9cdcfe]">&quot;programming&quot;</span>: <span className="text-[#ce9178]">["C++", "JavaScript", "TypeScript", "Solidity"]</span>,{"\n"}  <span className="text-[#9cdcfe]">&quot;frameworks&quot;</span>: <span className="text-[#ce9178]">["React", "Next.js", "Node.js", "tRPC"]</span>,{"\n"}  <span className="text-[#9cdcfe]">&quot;databases"</span>: <span className="text-[#ce9178]">["PostgreSQL", "MongoDB", "Redis"]</span>,{"\n"}  <span className="text-[#9cdcfe]">&quot;web3_crypto"</span>: <span className="text-[#ce9178]">["Ethereum", "Solana", "Anchor", "BIP39", "BIP44", "Ed25519", "ECDSA"]</span>{"\n"}<span>&#125;</span></pre>;
+  if (activeFile === "about.tsx") return <div className="py-3"><Line n={1}><span className="text-[#569cd6]">import</span> &#123; Builder &#125; <span className="text-[#569cd6]">from</span> <span className="text-[#ce9178]">"@/harshit"</span>;</Line><Line n={2}> </Line><Line n={3} active><span className="text-[#569cd6]">export const</span> profile: <span className="text-[#4ec9b0]">Builder</span> = &#123;</Line><Line n={4}>  name: <span className="text-[#ce9178]">"Harshit Sharma"</span>,</Line><Line n={5}>  education: <span className="text-[#ce9178]">"B.Tech CSE (AI & Robotics), VIT Chennai, 2027"</span>,</Line><Line n={6}>  role: <span className="text-[#ce9178]">"Full-stack developer with deep Web3 work"</span>,</Line><Line n={7}>  bio: <span className="text-[#ce9178]">"I build products end-to-end with Next.js, TypeScript, React, Node.js, and blockchain systems."</span>,</Line><Line n={8}>  values: [<span className="text-[#ce9178]">"ship fast"</span>, <span className="text-[#ce9178]">"understand deeply"</span>, <span className="text-[#ce9178]">"avoid unnecessary process"</span>],</Line><Line n={9}>&#125;;<span className="ml-1 inline-block h-4 w-2 animate-pulse bg-[#d4d4d4] align-middle" /></Line></div>;
+  if (activeFile.startsWith("projects/")) { const p = projects[activeFile as keyof typeof projects]; return <div className="py-3"><Line n={1}><span className="text-[#569cd6]">export const</span> project = &#123;</Line><Line n={2}>  title: <span className="text-[#ce9178]">"{p.title}"</span>,</Line><Line n={3}>  stack: <span className="text-[#ce9178]">{JSON.stringify(p.stack)}</span>,</Line><Line n={4}>  description: <span className="text-[#ce9178]">"{p.description}"</span>,</Line><Line n={5}>  highlights: <span className="text-[#ce9178]">{JSON.stringify(p.highlights)}</span>,</Line><Line n={6}>  liveDemo: <span className="text-[#ce9178]">"{p.demo}"</span>,</Line><Line n={7}>  github: <span className="text-[#ce9178]">"{p.github}"</span>,</Line><Line n={8}>&#125; <span className="text-[#569cd6]">as const</span>;</Line><div className="ml-12 mt-4"><button onClick={() => setPreview(p)} className="rounded bg-[#007acc] px-3 py-1.5 text-[12px] text-white hover:bg-[#0e86d4]">Open Preview</button></div></div>; }
+  if (activeFile === "skills.json") return <pre className="p-4 text-[12px] leading-[22px]"><span>&#123;</span>{"\n"}  <span className="text-[#9cdcfe]">"languages"</span>: <span className="text-[#ce9178]">["C++", "TypeScript", "JavaScript", "Solidity", "SQL", "HTML", "CSS"]</span>,{"\n"}  <span className="text-[#9cdcfe]">"frontend"</span>: <span className="text-[#ce9178]">["React.js", "Next.js 16", "Tailwind CSS", "React Flow", "Liveblocks"]</span>,{"\n"}  <span className="text-[#9cdcfe]">"backend"</span>: <span className="text-[#ce9178]">["Node.js", "tRPC", "REST APIs", "Server Actions", "Trigger.dev", "Fastify"]</span>,{"\n"}  <span className="text-[#9cdcfe]">"ai_automation"</span>: <span className="text-[#ce9178]">["AI Agents", "Browserbase", "Stagehand", "Workflow Automation", "Resend"]</span>,{"\n"}  <span className="text-[#9cdcfe]">"databases"</span>: <span className="text-[#ce9178]">["PostgreSQL", "Neon", "MongoDB", "Redis"]</span>,{"\n"}  <span className="text-[#9cdcfe]">"orms"</span>: <span className="text-[#ce9178]">["Drizzle ORM", "Prisma"]</span>,{"\n"}  <span className="text-[#9cdcfe]">"blockchain"</span>: <span className="text-[#ce9178]">["Ethereum", "Solana", "ethers.js", "@solana/web3.js", "Anchor", "Smart Contracts", "BIP39", "BIP44", "ECDSA", "Ed25519"]</span>,{"\n"}  <span className="text-[#9cdcfe]">"cloud_tools"</span>: <span className="text-[#ce9178]">["Git", "GitHub", "Docker", "AWS", "Railway", "Netlify", "Vercel", "Bun"]</span>{"\n"}<span>&#125;</span></pre>;
   if (activeFile === "education.md") return <div className="p-4 text-[13px] leading-7"><p className="text-[#569cd6]"># Education</p><p><span className="text-[#dcdcaa]">VIT Chennai</span></p><p>B.Tech in Computer Science, AI & Robotics</p><p className="text-[#6a9955]">Aug 2023 — May 2027</p><p>Coursework: DAA, Computer Networks, TOC, Compiler Design, DBMS.</p></div>;
-  return <div className="py-3"><Line n={1}><span className="text-[#569cd6]">export default function</span> <span className="text-[#dcdcaa]">Contact</span>() &#123;</Line><Line n={2}>  <span className="text-[#569cd6]">return</span> &#123;</Line><Line n={3}>    email: <span className="text-[#ce9178]">&quot;harshit.sharma270905@gmail.com&quot;</span>,</Line><Line n={4}>    phone: <span className="text-[#ce9178]">&quot;+91 9145825568&quot;</span>,</Line><Line n={5}>    location: <span className="text-[#ce9178]">&quot;Chennai, India&quot;</span>,</Line><Line n={6}>  &#125;;</Line><Line n={7}>&#125;</Line></div>;
+  return <div className="py-3"><Line n={1}><span className="text-[#569cd6]">export default function</span> <span className="text-[#dcdcaa]">Contact</span>() &#123;</Line><Line n={2}>  <span className="text-[#569cd6]">return</span> &#123;</Line><Line n={3}>    email: <span className="text-[#ce9178]">"harshit.sharma270905@gmail.com"</span>,</Line><Line n={4}>    phone: <span className="text-[#ce9178]">"+91 9145825568"</span>,</Line><Line n={5}>    location: <span className="text-[#ce9178]">"Chennai, India"</span>,</Line><Line n={6}>  &#125;;</Line><Line n={7}>&#125;</Line></div>;
 }
