@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import OpenSourcePreview from "@/components/contributions/open-source-preview";
 
-type FileKey = "about.tsx" | "projects/blackbox.ts" | "projects/keymesh.ts" | "projects/crypt.ts" | "projects/solana-notes.ts" | "projects/ai-work-flow.ts" | "projects/rate-limiter.ts" | "skills.json" | "education.md" | "contact.tsx";
+type FileKey = "about.tsx" | "open-source.tsx" | "projects/blackbox.ts" | "projects/keymesh.ts" | "projects/crypt.ts" | "projects/solana-notes.ts" | "projects/ai-work-flow.ts" | "projects/rate-limiter.ts" | "skills.json" | "education.md" | "contact.tsx";
 type FolderKey = "portfolio" | "projects";
 type Activity = "explorer" | "search" | "source" | "extensions";
 type Theme = "dark" | "light";
@@ -47,6 +48,7 @@ const STORAGE_KEY = "harshit-vscode-state-v2";
 
 const fileMeta: Record<FileKey, { label: string; icon: string; mode: string; folder: FolderKey; color: string }> = {
   "about.tsx": { label: "about.tsx", icon: "⚛", mode: "TypeScript React", folder: "portfolio", color: "text-[#61dafb]" },
+  "open-source.tsx": { label: "open-source.tsx", icon: "⑂", mode: "TypeScript React", folder: "portfolio", color: "text-[#4ec9b0]" },
   "projects/blackbox.ts": { label: "blackbox.ts", icon: "TS", mode: "TypeScript", folder: "projects", color: "text-[#3178c6]" },
   "projects/keymesh.ts": { label: "keymesh.ts", icon: "TS", mode: "TypeScript", folder: "projects", color: "text-[#3178c6]" },
   "projects/ai-work-flow.ts": { label: "ai-work-flow.ts", icon: "TS", mode: "TypeScript", folder: "projects", color: "text-[#3178c6]" },
@@ -491,7 +493,7 @@ export default function Home() {
     return () => { window.removeEventListener("keydown", onKey); window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); document.removeEventListener("mousedown", onDocumentClick); };
   }, []);
 
-  const editor = useMemo(() => renderEditor(activeFile, setPreview), [activeFile]);
+  const editor = useMemo(() => renderEditor(activeFile, setPreview, theme), [activeFile, theme]);
   const paletteItems = allFiles.filter((file) => file.toLowerCase().includes(paletteQuery.toLowerCase()));
   const bg = theme === "dark" ? "bg-[#1e1e1e] text-[#d4d4d4]" : "bg-[#fffffe] text-[#1f2328]";
 
@@ -521,7 +523,7 @@ export default function Home() {
             {openTabs.map((tab) => <button key={tab} onClick={() => openFile(tab)} onContextMenu={(e) => { e.preventDefault(); setContext({ x: e.clientX, y: e.clientY, file: tab }); }} className={`group flex flex-1 min-w-0 max-w-[180px] items-center justify-between gap-1.5 border-r border-[#3c3c3c] px-2.5 text-[12px] transition ${activeFile === tab ? "bg-[#1e1e1e] text-white" : "bg-[#2d2d2d] text-[#969696] hover:bg-[#333333]"}`}><div className="flex min-w-0 items-center gap-1.5 overflow-hidden"><FileIcon file={tab}/><span className="truncate">{fileMeta[tab].label}</span></div><span onClick={(e) => { e.stopPropagation(); closeTab(tab); }} className="shrink-0 rounded px-1 opacity-60 hover:bg-[#454545] group-hover:opacity-100">×</span></button>)}
           </div>
           <div className="flex h-7 shrink-0 items-center gap-1 border-b border-[#2b2b2b] bg-[#1e1e1e] px-3 text-[11px] text-[#858585]"><span>portfolio</span><span>›</span><span>{activeFile.includes("/") ? "projects ›" : ""}</span><span className="text-[#cccccc]">{fileMeta[activeFile].label}</span></div>
-          <div className="grid min-h-0 flex-1 grid-cols-[1fr_86px] overflow-hidden bg-[#1e1e1e]"><div className="overflow-auto selection:bg-[#264f78]">{editor}</div><Minimap file={activeFile}/></div>
+          <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden bg-[#1e1e1e] md:grid-cols-[1fr_86px]"><div className="overflow-auto selection:bg-[#264f78]">{editor}</div><div className="hidden md:block"><Minimap file={activeFile}/></div></div>
           {terminalOpen && <div className="relative shrink-0 overflow-hidden border-t border-[#3c3c3c] bg-[#1e1e1e]" style={{ height: terminalHeight }}><div onMouseDown={() => { resizing.current = "terminal"; }} className="absolute left-0 top-0 h-1 w-full cursor-row-resize hover:bg-[#007acc]"/><div className="flex h-8 items-center gap-5 border-b border-[#3c3c3c] px-3 text-[11px] text-[#cccccc]"><span className="border-b border-[#007acc] pb-1 text-white">TERMINAL</span><span>PROBLEMS 0</span><span>OUTPUT</span><button onClick={() => setTerminalOpen(false)} className="ml-auto">×</button></div><div className="h-[calc(100%-2rem)] overflow-auto p-3 text-[12px] leading-5">{terminalLines.map((line, i) => <div key={i} className={line.includes("$") ? "text-[#4ec9b0]" : "text-[#d4d4d4]"}>{line}</div>)}<form onSubmit={(e) => { e.preventDefault(); executeCommand(terminalInput); }} className="flex"><span className="text-[#4ec9b0]">harshit@portfolio:~$&nbsp;</span><input aria-label="Terminal command" value={terminalInput} onChange={(e) => setTerminalInput(e.target.value)} className="flex-1 bg-transparent outline-none" placeholder="try: help"/><span className="animate-pulse">▌</span></form></div></div>}
         </section>
       </div>
@@ -538,7 +540,7 @@ function SidePanel({ activity, activeFile, openFile, folders, setFolders }: { ac
   if (activity === "search") return <aside className="h-full border-r border-[#3c3c3c] bg-[#252526]"><PanelTitle title="Search"/><div className="p-3"><input className="w-full border border-[#3c3c3c] bg-[#3c3c3c] px-2 py-1 text-[12px] outline-none" placeholder="Search Harshit portfolio"/><p className="mt-3 text-[12px] text-[#858585]">5 results in projects, skills, contact.</p></div></aside>;
   if (activity === "source") return <aside className="h-full border-r border-[#3c3c3c] bg-[#252526]"><PanelTitle title="Source Control"/><div className="p-3 text-[12px]"><p className="mb-2 text-[#cccccc]">CHANGES</p>{["about.tsx", "projects/blackbox.ts", "projects/keymesh.ts", "projects/ai-work-flow.ts", "skills.json"].map((f) => <p key={f} className="py-1 text-[#d4d4d4]">M {f}</p>)}</div></aside>;
   if (activity === "extensions") return <aside className="h-full border-r border-[#3c3c3c] bg-[#252526]"><PanelTitle title="Extensions"/><div className="space-y-2 p-3 text-[12px]"><p>✓ TypeScript</p><p>✓ Tailwind CSS IntelliSense</p><p>✓ Docker</p><p>✓ Prisma</p></div></aside>;
-  return <aside className="h-full border-r border-[#3c3c3c] bg-[#252526]"><PanelTitle title="Explorer"/><div className="px-2 text-[12px]"><Folder name="PORTFOLIO" open={folders.portfolio} toggle={() => setFolders((f) => ({ ...f, portfolio: !f.portfolio }))}/>{folders.portfolio && (["about.tsx", "skills.json", "education.md", "contact.tsx"] as FileKey[]).map((file) => <FileRow key={file} file={file} active={activeFile === file} openFile={openFile}/>)}<Folder name="PROJECTS" open={folders.projects} toggle={() => setFolders((f) => ({ ...f, projects: !f.projects }))}/>{folders.projects && (["projects/blackbox.ts", "projects/keymesh.ts", "projects/ai-work-flow.ts", "projects/crypt.ts", "projects/rate-limiter.ts", "projects/solana-notes.ts"] as FileKey[]).map((file) => <FileRow key={file} file={file} active={activeFile === file} openFile={openFile}/>)}</div></aside>;
+  return <aside className="h-full border-r border-[#3c3c3c] bg-[#252526]"><PanelTitle title="Explorer"/><div className="px-2 text-[12px]"><Folder name="PORTFOLIO" open={folders.portfolio} toggle={() => setFolders((f) => ({ ...f, portfolio: !f.portfolio }))}/>{folders.portfolio && (["about.tsx", "open-source.tsx", "skills.json", "education.md", "contact.tsx"] as FileKey[]).map((file) => <FileRow key={file} file={file} active={activeFile === file} openFile={openFile}/>)}<Folder name="PROJECTS" open={folders.projects} toggle={() => setFolders((f) => ({ ...f, projects: !f.projects }))}/>{folders.projects && (["projects/blackbox.ts", "projects/keymesh.ts", "projects/ai-work-flow.ts", "projects/crypt.ts", "projects/rate-limiter.ts", "projects/solana-notes.ts"] as FileKey[]).map((file) => <FileRow key={file} file={file} active={activeFile === file} openFile={openFile}/>)}</div></aside>;
 }
 
 function PanelTitle({ title }: { title: string }) { return <div className="h-9 px-4 py-2 text-[11px] uppercase tracking-wide text-[#bbbbbb]">{title}</div>; }
@@ -633,8 +635,9 @@ function Dropdown({ items, explorerOpen, setExplorerOpen, terminalOpen, setTermi
 }
 
 
-function renderEditor(activeFile: FileKey, setPreview: (p: Project) => void) {
+function renderEditor(activeFile: FileKey, setPreview: (p: Project) => void, theme: Theme) {
   if (activeFile === "about.tsx") return <div className="py-3"><Line n={1}><span className="text-[#569cd6]">import</span> &#123; Builder &#125; <span className="text-[#569cd6]">from</span> <span className="text-[#ce9178]">"@/harshit"</span>;</Line><Line n={2}> </Line><Line n={3} active><span className="text-[#569cd6]">export const</span> profile: <span className="text-[#4ec9b0]">Builder</span> = &#123;</Line><Line n={4}>  name: <span className="text-[#ce9178]">"Harshit Sharma"</span>,</Line><Line n={5}>  education: <span className="text-[#ce9178]">"B.Tech CSE (AI & Robotics), VIT Chennai, 2027"</span>,</Line><Line n={6}>  role: <span className="text-[#ce9178]">"Full-stack developer with deep Web3 work"</span>,</Line><Line n={7}>  bio: <span className="text-[#ce9178]">"I build products end-to-end with Next.js, TypeScript, React, Node.js, and blockchain systems."</span>,</Line><Line n={8}>  values: [<span className="text-[#ce9178]">"ship fast"</span>, <span className="text-[#ce9178]">"understand deeply"</span>, <span className="text-[#ce9178]">"avoid unnecessary process"</span>],</Line><Line n={9}>&#125;;<span className="ml-1 inline-block h-4 w-2 animate-pulse bg-[#d4d4d4] align-middle" /></Line></div>;
+  if (activeFile === "open-source.tsx") return <OpenSourcePreview theme={theme}/>;
   if (activeFile.startsWith("projects/")) {
     const p = projects[activeFile as keyof typeof projects];
     return <div className="py-3">
