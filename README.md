@@ -96,31 +96,34 @@ The portfolio content itself is rendered as if it were real source code: an `abo
 
 ```
 personal-ai-site-next/
-├── public/                 # Static SVG assets
-│   ├── file.svg
-│   ├── globe.svg
-│   ├── next.svg
-│   ├── vercel.svg
-│   └── window.svg
+├── public/                  # Static assets
 ├── src/
-│   └── app/
-│       ├── favicon.ico
-│       ├── globals.css     # Tailwind import + CSS variables + base styles
-│       ├── layout.tsx      # Root layout, fonts, metadata (SEO title/description)
-│       └── page.tsx        # The entire VS Code portfolio (client component)
+│   ├── app/
+│   │   ├── contributions/
+│   │   │   └── page.tsx     # Open-source contribution history route
+│   │   ├── favicon.ico
+│   │   ├── globals.css
+│   │   ├── layout.tsx       # Root layout, fonts, and site metadata
+│   │   └── page.tsx         # VS Code-style portfolio experience
+│   ├── components/
+│   │   └── contributions/
+│   │       ├── contribution-browser.tsx
+│   │       └── open-source-preview.tsx
+│   └── data/
+│       └── contributions.ts # Contribution records and status/metric helpers
 ├── .gitignore
 ├── AGENTS.md                # AI agent guidelines for this Next.js version
 ├── CLAUDE.md                # Points to AGENTS.md
-├── README.md                # You are here
-├── eslint.config.mjs        # ESLint flat config (core-web-vitals + TS)
-├── next.config.ts           # Next.js config (empty defaults)
-├── next-env.d.ts            # Next.js TypeScript ambient declarations
+├── README.md
+├── eslint.config.mjs
+├── next.config.ts
+├── package-lock.json
 ├── package.json
-├── postcss.config.mjs       # Tailwind PostCSS plugin
-└── tsconfig.json            # TS config with `@/*` -> `./src/*` path alias
+├── postcss.config.mjs
+└── tsconfig.json
 ```
 
-The entire app lives in a single client component (`src/app/page.tsx`) for maximum cohesion — all editor state, terminal logic, theming, and rendering coexist in one file.
+The VS Code-style home experience is implemented in the client component at `src/app/page.tsx`. The separate `/contributions` route uses dedicated components and a typed data module so contribution records and their status calculations stay separate from the editor UI.
 
 ---
 
