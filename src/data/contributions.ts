@@ -865,7 +865,7 @@ export const contributions: Contribution[] = [
     status: "fork-work",
     forkUrl: "https://github.com/harshitsharmaaaa/mastra/tree/fix/clickhouse-deletemessages-no-updatedat",
     verifiedAt: "2026-10-24",
-  },,
+  },
 
   {
     id: "conductor-1785",
