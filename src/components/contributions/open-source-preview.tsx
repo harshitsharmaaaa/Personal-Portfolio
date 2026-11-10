@@ -6,10 +6,10 @@ import {
 } from "@/data/contributions";
 
 const featuredIds = [
-  "draco-11",
-  "traceroot-2607",
-  "traceroot-2526",
-  "traceroot-2672",
+  "conductor-1785",
+  "draco-13",
+  "traceroot-cli-236",
+  "backstage-36510",
 ];
 
 function statusClass(contribution: Contribution) {
