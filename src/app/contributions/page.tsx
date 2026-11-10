@@ -15,12 +15,12 @@ export const metadata: Metadata = {
 };
 
 const featuredIds = [
-  "draco-11",
-  "traceroot-2607",
-  "traceroot-2526",
-  "traceroot-2672",
-  "conductor-1747",
-  "hono-5565",
+  "conductor-1785",
+  "draco-13",
+  "traceroot-cli-236",
+  "backstage-36525",
+  "conductor-1825",
+  "backstage-36510",
 ];
 
 const metricLabels = [
@@ -125,7 +125,7 @@ export default function ContributionsPage() {
             developer tooling across open-source projects.
           </p>
           <p className="mt-3 text-[11px] leading-5 text-[#858585]">
-            Statuses verified against upstream GitHub records on 24 Oct 2026.
+            Latest upstream status check: 10 Nov 2026. Each record retains its individual verification date.
             Fork-only work and issue reports are not counted as merged pull requests.
           </p>
         </header>
@@ -185,7 +185,7 @@ export default function ContributionsPage() {
         </section>
 
         <footer className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-[#3c3c3c] pt-5 text-xs text-[#858585]">
-          <span>Static contribution records · last verified 24 Oct 2026</span>
+          <span>Static contribution records · latest upstream check 10 Nov 2026</span>
           <Link href="/" className="text-[#9cdcfe] hover:text-white">
             Return to portfolio
           </Link>
