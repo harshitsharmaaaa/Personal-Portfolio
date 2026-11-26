@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useMobileActive } from "./experience-context";
 
 type NavItem = {
   id: string;
@@ -19,35 +20,74 @@ const navItems: NavItem[] = [
   { id: "contact", number: "07", label: "Final Stop", lineColor: "#06b6d4" },
 ];
 
+function MenuIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      {open ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
+    </svg>
+  );
+}
+
 export default function SubwayNav() {
+  const active = useMobileActive();
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("hero");
 
   useEffect(() => {
+    if (!active) return;
+
     const handleScroll = () => {
       const sections = navItems.map((item) => document.getElementById(item.id));
-      const scrollPosition = window.scrollY + 140;
-
       for (let i = sections.length - 1; i >= 0; i--) {
         const section = sections[i];
-        if (section && section.offsetTop <= scrollPosition) {
-          setActiveSection(navItems[i].id);
-          break;
+        if (section) {
+          const rect = section.getBoundingClientRect();
+          if (rect.top <= 140) {
+            setActiveSection(navItems[i].id);
+            break;
+          }
         }
       }
     };
 
+    handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [active]);
+
+  useEffect(() => {
+    if (!active || !isOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsOpen(false);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [active, isOpen]);
 
   const handleNavClick = (id: string) => {
     setIsOpen(false);
     const element = document.getElementById(id);
     if (element) {
       const yOffset = -70;
-      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: "smooth" });
+      const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: y, behavior: prefersReducedMotion ? "auto" : "smooth" });
     }
   };
 
@@ -65,8 +105,9 @@ export default function SubwayNav() {
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
         {/* Transit Line Brand */}
         <button
+          type="button"
           onClick={() => handleNavClick("hero")}
-          className="group flex items-center gap-2 text-left focus-visible:outline-2 focus-visible:outline-amber-400"
+          className="group flex min-h-[44px] items-center gap-2 text-left focus-visible:outline-2 focus-visible:outline-amber-400"
           aria-label="Back to top"
         >
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-400 font-bold text-[#0a0f1d] shadow-sm">
@@ -82,16 +123,17 @@ export default function SubwayNav() {
           </div>
         </button>
 
-        {/* Live Status Pill & Menu Toggle */}
+        {/* Route Summary & Menu Toggle */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="hidden items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-950/60 px-2.5 py-1 text-[10px] font-medium text-emerald-300 sm:inline-flex">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>ONLINE // BUILDING</span>
+          <div className="hidden items-center gap-1.5 rounded-full border border-slate-600/60 bg-slate-900/70 px-2.5 py-1 text-[10px] font-medium text-slate-300 sm:inline-flex">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+            <span>7 STOPS · 3 LINES</span>
           </div>
 
           <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="flex h-9 items-center gap-2 rounded-full border border-amber-400/30 bg-slate-900/80 px-3 text-xs font-semibold text-amber-300 hover:border-amber-400 hover:bg-slate-800 transition active:scale-95 focus-visible:outline-2 focus-visible:outline-amber-400"
+            type="button"
+            onClick={() => setIsOpen((open) => !open)}
+            className="flex min-h-[44px] items-center gap-2 rounded-full border border-amber-400/30 bg-slate-900/80 px-3.5 text-xs font-semibold text-amber-300 transition hover:border-amber-400 hover:bg-slate-800 active:scale-95 focus-visible:outline-2 focus-visible:outline-amber-400"
             aria-expanded={isOpen}
             aria-controls="subway-navigation-menu"
             aria-label="Toggle Station Menu"
@@ -99,7 +141,7 @@ export default function SubwayNav() {
             <span className="font-mono text-[10px] uppercase tracking-wider">
               {isOpen ? "Close" : "Stations"}
             </span>
-            <span className="text-sm font-bold">{isOpen ? "✕" : "☰"}</span>
+            <MenuIcon open={isOpen} />
           </button>
         </div>
       </div>
@@ -108,13 +150,13 @@ export default function SubwayNav() {
       {isOpen && (
         <>
           <div
-            className="fixed inset-0 top-[62px] z-30 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-x-0 bottom-0 top-[63px] z-30 bg-black/60 backdrop-blur-sm"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
           <nav
             id="subway-navigation-menu"
-            className="relative z-40 border-b border-amber-400/20 bg-[#0d1527] px-4 py-4 shadow-2xl sm:px-6"
+            className="absolute inset-x-0 top-full z-40 max-h-[calc(100svh-63px)] overflow-y-auto border-b border-amber-400/20 bg-[#0d1527] px-4 py-4 shadow-2xl sm:px-6"
             aria-label="Transit stations navigation"
           >
             <div className="mb-2 flex items-center justify-between border-b border-slate-700/50 pb-2">
@@ -129,12 +171,14 @@ export default function SubwayNav() {
                 const isActive = activeSection === item.id;
                 return (
                   <button
+                    type="button"
                     key={item.id}
                     onClick={() => handleNavClick(item.id)}
-                    className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-left transition active:scale-[0.98] ${
+                    aria-current={isActive ? "location" : undefined}
+                    className={`flex min-h-[44px] items-center justify-between rounded-lg px-3 py-2.5 text-left transition active:scale-[0.98] ${
                       isActive
-                        ? "bg-amber-400/15 text-amber-300 border border-amber-400/40"
-                        : "text-slate-300 hover:bg-slate-800/80 hover:text-white border border-transparent"
+                        ? "border border-amber-400/40 bg-amber-400/15 text-amber-300"
+                        : "border border-transparent text-slate-300 hover:bg-slate-800/80 hover:text-white"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -156,14 +200,14 @@ export default function SubwayNav() {
               })}
             </div>
 
-            <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
-              <a
-                href="#contact"
-                onClick={() => setIsOpen(false)}
-                className="w-full text-center rounded-full bg-amber-400 py-2 text-xs font-bold text-[#0a0f1d] hover:bg-amber-300 transition"
+            <div className="mt-4 flex items-center justify-between border-t border-slate-800 pt-3">
+              <button
+                type="button"
+                onClick={() => handleNavClick("contact")}
+                className="w-full min-h-[44px] rounded-full bg-amber-400 py-2.5 text-center text-xs font-bold text-[#0a0f1d] transition hover:bg-amber-300 active:scale-95 focus-visible:outline-2 focus-visible:outline-amber-400"
               >
                 Express To Contact →
-              </a>
+              </button>
             </div>
           </nav>
         </>

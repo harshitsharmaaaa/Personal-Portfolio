@@ -448,7 +448,6 @@ export const profile = {
   linkedin: "https://www.linkedin.com/in/harshit-sharma-46a210341/",
   twitter: "https://x.com/Harshit_Codess",
   values: ["ship fast", "understand deeply", "avoid unnecessary process"],
-  status: "Online // Open to High-Impact Opportunities",
 } as const;
 
 export const routesData = [
@@ -529,8 +528,8 @@ export const routesData = [
 export const journeyMilestones = [
   {
     station: "Station 01 // Foundations",
-    code: "VIT-23",
-    date: "Aug 2023 — Present",
+    code: "VIT",
+    phase: "2023 — 2027",
     title: "Computer Science (AI & Robotics) at VIT Chennai",
     route: "Central Junction",
     routeColor: "blue",
@@ -540,8 +539,8 @@ export const journeyMilestones = [
   },
   {
     station: "Station 02 // Systems & Isolation",
-    code: "SYS-24",
-    date: "2024",
+    code: "SYS",
+    phase: "SYSTEMS TRACK",
     title: "Sandboxed Execution & High-Throughput Engines",
     route: "Blue Line Connection",
     routeColor: "blue",
@@ -551,8 +550,8 @@ export const journeyMilestones = [
   },
   {
     station: "Station 03 // Cryptographic Protocols",
-    code: "CRY-24",
-    date: "2024 — 2025",
+    code: "CRY",
+    phase: "CRYPTO TRACK",
     title: "Threshold ECDSA & Multi-Chain Architecture",
     route: "Green Line Connection",
     routeColor: "green",
@@ -562,13 +561,13 @@ export const journeyMilestones = [
   },
   {
     station: "Station 04 // Open-Source & Production Tooling",
-    code: "OSS-26",
-    date: "2025 — 2026",
+    code: "OSS",
+    phase: "UPSTREAM TRACK",
     title: "Upstream Production Hardening Across Ecosystems",
     route: "Purple Express Line",
     routeColor: "purple",
     summary:
-      "Authored 15 merged upstream PRs across Conductor, Draco, Backstage, and TraceRoot: durable LangGraph checkpointing, Elasticsearch 8 E2E persistence, terminal sanitization, and security boundaries.",
+      "Contributed 17 merged upstream PRs across Conductor, Draco, Backstage, TraceRoot, and self-healing-hybrid-RAG, plus reviewer-validated work in Hono. Draco #9 and #11 cover overlapping hardening.",
     tags: ["Conductor", "Draco", "Backstage", "TraceRoot", "Hono"],
   },
 ] as const;

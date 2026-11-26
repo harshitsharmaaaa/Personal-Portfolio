@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import OpenSourcePreview from "@/components/contributions/open-source-preview";
 
 type FileKey = "about.tsx" | "open-source.tsx" | "projects/blackbox.ts" | "projects/keymesh.ts" | "projects/crypt.ts" | "projects/solana-notes.ts" | "projects/ai-work-flow.ts" | "projects/rate-limiter.ts" | "skills.json" | "education.md" | "contact.tsx";
@@ -391,7 +391,7 @@ function FileIcon({ file }: { file: FileKey }) {
   return <span className={`grid h-4 min-w-5 place-items-center rounded text-[9px] font-bold ${meta.color}`}>{meta.icon}</span>;
 }
 
-export default function DesktopPortfolio() {
+export default function DesktopPortfolio({ active = true }: { active?: boolean }) {
   const [activeFile, setActiveFile] = useState<FileKey>("about.tsx");
   const [openTabs, setOpenTabs] = useState<FileKey[]>(["about.tsx", "projects/keymesh.ts", "projects/ai-work-flow.ts", "skills.json"]);
   const [activity, setActivity] = useState<Activity>("explorer");
@@ -412,12 +412,12 @@ export default function DesktopPortfolio() {
   const menuRef = useRef<HTMLDivElement>(null);
   const resizing = useRef<"sidebar" | "terminal" | null>(null);
 
-  const openFile = (file: FileKey) => {
-    setOpenTabs((tabs) => tabs.includes(file) ? tabs : [...tabs, file]);
+  const openFile = useCallback((file: FileKey) => {
+    setOpenTabs((tabs) => (tabs.includes(file) ? tabs : [...tabs, file]));
     setActiveFile(file);
     setPaletteOpen(false);
     setMobilePanel(false);
-  };
+  }, []);
 
   const closeTab = (file: FileKey) => {
     setOpenTabs((tabs) => {
@@ -427,30 +427,48 @@ export default function DesktopPortfolio() {
     });
   };
 
-  const executeCommand = (command: string, boot = false) => {
-    const cmd = command.trim();
-    if (!cmd) return;
-    const response = cmd.includes("whoami") ? ["Harshit Sharma — CS AI & Robotics @ VIT Chennai"]
-      : cmd.includes("contact") ? ["email: harshitjob0027@gmail.com" ,"phone: +91 9145825568", "location: Chennai, India"]
-      : cmd.includes("git status") ? ["On branch main", "Changes: KEYMESH featured, AI Work Flow updated, all project URLs verified", "No runtime errors detected"]
-      : cmd.includes("help") ? ["Commands: whoami, contact, git status, open keymesh.ts, open about.tsx, open skills.json, theme"]
-      : cmd.startsWith("open ") ? (allFiles.includes(cmd.replace("open ", "") as FileKey) ? (openFile(cmd.replace("open ", "") as FileKey), [`Opened ${cmd.replace("open ", "")}`]) : ["File not found"])
-      : cmd.includes("theme") ? (setTheme((t) => t === "dark" ? "light" : "dark"), ["Theme toggled"])
-      : ["ready - compiled successfully", "Local: http://localhost:3000"];
-    setTerminalLines((lines) => [...lines, `${boot ? "$" : "harshit@portfolio:~$"} ${cmd}`, ...response]);
-    setTerminalInput("");
-  };
+  const executeCommand = useCallback(
+    (command: string, boot = false) => {
+      const cmd = command.trim();
+      if (!cmd) return;
+      const response = cmd.includes("whoami")
+        ? ["Harshit Sharma — CS AI & Robotics @ VIT Chennai"]
+        : cmd.includes("contact")
+        ? ["email: harshitjob0027@gmail.com", "phone: +91 9145825568", "location: Chennai, India"]
+        : cmd.includes("git status")
+        ? ["On branch main", "Changes: KEYMESH featured, AI Work Flow updated, all project URLs verified", "No runtime errors detected"]
+        : cmd.includes("help")
+        ? ["Commands: whoami, contact, git status, open keymesh.ts, open about.tsx, open skills.json, theme"]
+        : cmd.startsWith("open ")
+        ? allFiles.includes(cmd.replace("open ", "") as FileKey)
+          ? (openFile(cmd.replace("open ", "") as FileKey), [`Opened ${cmd.replace("open ", "")}`])
+          : ["File not found"]
+        : cmd.includes("theme")
+        ? (setTheme((t) => (t === "dark" ? "light" : "dark")), ["Theme toggled"])
+        : ["ready - compiled successfully", "Local: http://localhost:3000"];
+      setTerminalLines((lines) => [...lines, `${boot ? "$" : "harshit@portfolio:~$"} ${cmd}`, ...response]);
+      setTerminalInput("");
+    },
+    [openFile]
+  );
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.innerWidth >= 1024) {
-      document.title = "Harshit Sharma — Visual Studio Code";
-    }
+    if (!active) return;
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       try {
-        const saved = JSON.parse(raw) as Partial<{ activeFile: FileKey; openTabs: FileKey[]; sidebarWidth: number; terminalHeight: number; theme: Theme; terminalOpen: boolean; explorerOpen: boolean }>;
+        const saved = JSON.parse(raw) as Partial<{
+          activeFile: FileKey;
+          openTabs: FileKey[];
+          sidebarWidth: number;
+          terminalHeight: number;
+          theme: Theme;
+          terminalOpen: boolean;
+          explorerOpen: boolean;
+        }>;
         if (saved.activeFile && allFiles.includes(saved.activeFile)) setActiveFile(saved.activeFile);
-        if (saved.openTabs?.every((f) => allFiles.includes(f))) setOpenTabs(saved.openTabs.length ? saved.openTabs : ["about.tsx"]);
+        if (saved.openTabs?.every((f) => allFiles.includes(f)))
+          setOpenTabs(saved.openTabs.length ? saved.openTabs : ["about.tsx"]);
         if (saved.sidebarWidth) setSidebarWidth(saved.sidebarWidth);
         if (saved.terminalHeight) setTerminalHeight(saved.terminalHeight);
         if (saved.theme) setTheme(saved.theme);
@@ -458,18 +476,26 @@ export default function DesktopPortfolio() {
         if (typeof saved.explorerOpen === "boolean") setExplorerOpen(saved.explorerOpen);
       } catch {}
     }
+    const timerIds: ReturnType<typeof setTimeout>[] = [];
     let delay = 0;
     terminalBoot.forEach((cmd) => {
-      setTimeout(() => executeCommand(cmd, true), delay);
+      const id = setTimeout(() => executeCommand(cmd, true), delay);
+      timerIds.push(id);
       delay += 650;
     });
-  }, []);
+
+    return () => {
+      timerIds.forEach(clearTimeout);
+    };
+  }, [active, executeCommand]);
 
   useEffect(() => {
+    if (!active) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ activeFile, openTabs, sidebarWidth, terminalHeight, theme, terminalOpen, explorerOpen }));
-  }, [activeFile, openTabs, sidebarWidth, terminalHeight, theme, terminalOpen, explorerOpen]);
+  }, [active, activeFile, openTabs, sidebarWidth, terminalHeight, theme, terminalOpen, explorerOpen]);
 
   useEffect(() => {
+    if (!active) return;
     const onKey = (event: KeyboardEvent) => {
       const ctrl = event.ctrlKey || event.metaKey;
       if (ctrl && event.key.toLowerCase() === "p") { event.preventDefault(); setPaletteOpen(true); }
@@ -493,7 +519,7 @@ export default function DesktopPortfolio() {
     window.addEventListener("mouseup", onUp);
     document.addEventListener("mousedown", onDocumentClick);
     return () => { window.removeEventListener("keydown", onKey); window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); document.removeEventListener("mousedown", onDocumentClick); };
-  }, []);
+  }, [active]);
 
   const editor = useMemo(() => renderEditor(activeFile, setPreview, theme), [activeFile, theme]);
   const paletteItems = allFiles.filter((file) => file.toLowerCase().includes(paletteQuery.toLowerCase()));

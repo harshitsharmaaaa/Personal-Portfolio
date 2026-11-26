@@ -1,25 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { profile } from "@/data/projects";
+import Reveal from "./reveal";
 
 export default function ContactSection() {
   const [copied, setCopied] = useState(false);
+  const copyTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeout.current) clearTimeout(copyTimeout.current);
+    };
+  }, []);
 
   const handleCopyEmail = async () => {
+    let success = false;
     try {
       await navigator.clipboard.writeText(profile.email);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
+      success = true;
     } catch {
-      // Fallback
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = profile.email;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-9999px";
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand("copy");
+        success = true;
+      } catch {
+        // Copy failed silently
+      }
+      document.body.removeChild(textArea);
+    }
+    if (success) {
       setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
+      if (copyTimeout.current) clearTimeout(copyTimeout.current);
+      copyTimeout.current = setTimeout(() => setCopied(false), 2500);
     }
   };
 
   const handleScrollTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: prefersReducedMotion ? "auto" : "smooth" });
   };
 
   return (
@@ -28,36 +53,44 @@ export default function ContactSection() {
       className="relative overflow-hidden bg-[#070b16] px-4 py-16 text-slate-100 sm:px-6 sm:py-24"
     >
       {/* Decorative Closing Route Convergence Lines */}
-      <div className="pointer-events-none absolute inset-0 z-0 opacity-20">
-        <svg
-          className="h-full w-full"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 400 400"
-          preserveAspectRatio="none"
-        >
-          <path
-            d="M 50,0 Q 150,150 200,200"
-            fill="none"
-            stroke="#3b82f6"
-            strokeWidth="4"
-          />
-          <path
-            d="M 200,0 L 200,200"
-            fill="none"
-            stroke="#fbbf24"
-            strokeWidth="4"
-          />
-          <path
-            d="M 350,0 Q 250,150 200,200"
-            fill="none"
-            stroke="#10b981"
-            strokeWidth="4"
-          />
-          <circle cx="200" cy="200" r="12" fill="#fbbf24" stroke="#ffffff" strokeWidth="4" />
-        </svg>
-      </div>
+      <Reveal className="pointer-events-none absolute inset-0 z-0">
+        <div className="h-full w-full opacity-20">
+          <svg
+            className="h-full w-full"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 400 400"
+            preserveAspectRatio="none"
+          >
+            <path
+              className="closing-route"
+              pathLength={1}
+              d="M 50,0 Q 150,150 200,200"
+              fill="none"
+              stroke="#3b82f6"
+              strokeWidth="4"
+            />
+            <path
+              className="closing-route"
+              pathLength={1}
+              d="M 200,0 L 200,200"
+              fill="none"
+              stroke="#fbbf24"
+              strokeWidth="4"
+            />
+            <path
+              className="closing-route"
+              pathLength={1}
+              d="M 350,0 Q 250,150 200,200"
+              fill="none"
+              stroke="#10b981"
+              strokeWidth="4"
+            />
+            <circle cx="200" cy="200" r="12" fill="#fbbf24" stroke="#ffffff" strokeWidth="4" />
+          </svg>
+        </div>
+      </Reveal>
 
-      <div className="relative z-10 mx-auto max-w-3xl text-center space-y-6">
+      <Reveal className="relative z-10 mx-auto max-w-3xl space-y-6 text-center">
         {/* Terminal Station Badge */}
         <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-950/70 px-3.5 py-1 font-mono text-[11px] font-bold text-cyan-300">
           <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
@@ -70,8 +103,8 @@ export default function ContactSection() {
             LET&apos;S BUILD <span className="text-amber-400">SOMETHING</span>
           </h2>
           <p className="mx-auto max-w-lg text-sm leading-relaxed text-slate-300 sm:text-base">
-            End of the line. Open for software engineering opportunities, distributed systems challenges,
-            and high-impact technical collaborations.
+            End of the line. Have a system to build, an upstream bug to fix, or a role in mind?
+            Start a conversation.
           </p>
         </div>
 
@@ -81,7 +114,7 @@ export default function ContactSection() {
             <span className="font-mono text-[10px] uppercase tracking-wider text-amber-400">
               DISPATCH CHANNEL
             </span>
-            <span className="font-mono text-[10px] text-emerald-400">ONLINE</span>
+            <span className="font-mono text-[10px] text-slate-400">EMAIL</span>
           </div>
 
           <div className="font-mono text-sm sm:text-base font-bold text-white break-all">
@@ -90,15 +123,19 @@ export default function ContactSection() {
 
           <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
             <button
+              type="button"
               onClick={handleCopyEmail}
-              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-amber-400 px-4 text-xs font-bold text-[#0a0f1d] hover:bg-amber-300 transition active:scale-95 focus-visible:outline-2 focus-visible:outline-amber-400"
+              className="flex h-11 min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-full bg-amber-400 px-4 text-xs font-bold text-[#0a0f1d] transition hover:bg-amber-300 active:scale-95 focus-visible:outline-2 focus-visible:outline-amber-400 sm:flex-1"
             >
               <span>{copied ? "Copied to Clipboard! ✓" : "Copy Email Address"}</span>
             </button>
+            <span className="sr-only" role="status" aria-live="polite">
+              {copied ? "Email address copied to clipboard." : ""}
+            </span>
 
             <a
               href={`mailto:${profile.email}`}
-              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-full border border-slate-600 bg-slate-800/80 px-4 text-xs font-semibold text-white hover:border-amber-400 hover:text-amber-300 transition active:scale-95 focus-visible:outline-2 focus-visible:outline-amber-400"
+              className="flex h-11 min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-full border border-slate-600 bg-slate-800/80 px-4 text-xs font-semibold text-white transition hover:border-amber-400 hover:text-amber-300 active:scale-95 focus-visible:outline-2 focus-visible:outline-amber-400 sm:flex-1"
             >
               <span>Open Mail App</span>
               <span>↗</span>
@@ -112,7 +149,7 @@ export default function ContactSection() {
             href={profile.resume}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900/90 px-4 py-2 font-mono text-xs font-semibold text-slate-200 hover:border-amber-400 hover:text-amber-300 transition active:scale-95"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900/90 px-4 py-2 font-mono text-xs font-semibold text-slate-200 transition hover:border-amber-400 hover:text-amber-300 active:scale-95"
           >
             <span>Resume</span>
             <span>↗</span>
@@ -122,7 +159,7 @@ export default function ContactSection() {
             href={profile.github}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900/90 px-4 py-2 font-mono text-xs font-semibold text-slate-200 hover:border-amber-400 hover:text-amber-300 transition active:scale-95"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900/90 px-4 py-2 font-mono text-xs font-semibold text-slate-200 transition hover:border-amber-400 hover:text-amber-300 active:scale-95"
           >
             <span>GitHub</span>
             <span>↗</span>
@@ -132,7 +169,7 @@ export default function ContactSection() {
             href={profile.linkedin}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900/90 px-4 py-2 font-mono text-xs font-semibold text-slate-200 hover:border-amber-400 hover:text-amber-300 transition active:scale-95"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900/90 px-4 py-2 font-mono text-xs font-semibold text-slate-200 transition hover:border-amber-400 hover:text-amber-300 active:scale-95"
           >
             <span>LinkedIn</span>
             <span>↗</span>
@@ -142,7 +179,7 @@ export default function ContactSection() {
             href={profile.twitter}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900/90 px-4 py-2 font-mono text-xs font-semibold text-slate-200 hover:border-amber-400 hover:text-amber-300 transition active:scale-95"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900/90 px-4 py-2 font-mono text-xs font-semibold text-slate-200 transition hover:border-amber-400 hover:text-amber-300 active:scale-95"
           >
             <span>X / Twitter</span>
             <span>↗</span>
@@ -153,7 +190,7 @@ export default function ContactSection() {
         <div className="pt-8">
           <button
             onClick={handleScrollTop}
-            className="inline-flex items-center gap-2 rounded-full border border-slate-800 bg-[#0a0f1d] px-4 py-2 font-mono text-xs text-slate-400 hover:border-slate-600 hover:text-amber-400 transition active:scale-95"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-slate-800 bg-[#0a0f1d] px-5 py-2.5 font-mono text-xs text-slate-400 hover:border-slate-600 hover:text-amber-400 transition active:scale-95 focus-visible:outline-2 focus-visible:outline-amber-400"
           >
             <span>↑ Back to First Stop</span>
           </button>
@@ -161,10 +198,10 @@ export default function ContactSection() {
 
         {/* Technical Footer */}
         <footer className="pt-10 border-t border-slate-800/80 text-center font-mono text-[11px] text-slate-500 space-y-1">
-          <p>© {new Date().getFullYear()} Harshit Sharma · Subway Editorial Edition</p>
+          <p>© Harshit Sharma · Subway Editorial Edition</p>
           <p>Next.js 16 App Router · React 19 · TypeScript · Tailwind CSS 4</p>
         </footer>
-      </div>
+      </Reveal>
     </section>
   );
 }

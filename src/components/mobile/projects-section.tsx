@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { allProjectList, type Project } from "@/data/projects";
+import Reveal from "./reveal";
 
 const routeBadgeStyles: Record<string, { bg: string; text: string; border: string }> = {
   blue: { bg: "bg-blue-600", text: "text-blue-400", border: "border-blue-500/40" },
@@ -13,9 +14,9 @@ const routeBadgeStyles: Record<string, { bg: string; text: string; border: strin
 function ProjectCard({ project }: { project: Project }) {
   const [expanded, setExpanded] = useState(false);
   const badgeStyle = routeBadgeStyles[project.routeColor] || routeBadgeStyles.blue;
+  const panelId = `project-${project.id}-details`;
   const hasDeepDive =
     Boolean(project.architectureDiagram) ||
-    Boolean(project.problem) ||
     Boolean(project.executionFlow) ||
     Boolean(project.whyAsync) ||
     Boolean(project.componentBreakdown) ||
@@ -71,7 +72,7 @@ function ProjectCard({ project }: { project: Project }) {
 
       {/* Verified Metrics Strip (if available) */}
       {project.metrics && project.metrics.length > 0 && (
-        <div className="mt-4 grid grid-cols-2 gap-2 rounded-xl border border-slate-800 bg-[#070b16] p-3 sm:grid-cols-5">
+        <div className="mt-4 grid grid-cols-2 gap-2 rounded-xl border border-slate-800 bg-[#070b16] p-3 sm:grid-cols-3">
           {project.metrics.map((m) => (
             <div key={m.label} className="text-center p-1">
               <div className="font-mono text-base font-extrabold text-amber-400">
@@ -140,7 +141,7 @@ function ProjectCard({ project }: { project: Project }) {
             href={project.github}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full bg-amber-400 px-4 py-2 text-xs font-bold text-[#0a0f1d] hover:bg-amber-300 transition active:scale-95 focus-visible:outline-2 focus-visible:outline-amber-400"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full bg-amber-400 px-4 py-2 text-xs font-bold text-[#0a0f1d] transition hover:bg-amber-300 active:scale-95 focus-visible:outline-2 focus-visible:outline-amber-400"
           >
             <span>GitHub Repository</span>
             <span>↗</span>
@@ -152,7 +153,7 @@ function ProjectCard({ project }: { project: Project }) {
             href={project.demo}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/50 bg-emerald-950/60 px-4 py-2 text-xs font-semibold text-emerald-300 hover:bg-emerald-900/80 transition active:scale-95 focus-visible:outline-2 focus-visible:outline-emerald-400"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-emerald-500/50 bg-emerald-950/60 px-4 py-2 text-xs font-semibold text-emerald-300 transition hover:bg-emerald-900/80 active:scale-95 focus-visible:outline-2 focus-visible:outline-emerald-400"
           >
             <span>Live Demo</span>
             <span>↗</span>
@@ -164,7 +165,7 @@ function ProjectCard({ project }: { project: Project }) {
             href={project.npm}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/50 bg-rose-950/60 px-4 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-900/80 transition active:scale-95 focus-visible:outline-2 focus-visible:outline-rose-400"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-rose-500/50 bg-rose-950/60 px-4 py-2 text-xs font-semibold text-rose-300 transition hover:bg-rose-900/80 active:scale-95 focus-visible:outline-2 focus-visible:outline-rose-400"
           >
             <span>npm Package</span>
             <span>↗</span>
@@ -176,9 +177,21 @@ function ProjectCard({ project }: { project: Project }) {
             href={project.architectureLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full border border-slate-700 bg-slate-800/80 px-3.5 py-2 text-xs font-medium text-slate-300 hover:text-white transition active:scale-95"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-slate-700 bg-slate-800/80 px-3.5 py-2 text-xs font-medium text-slate-300 transition hover:text-white active:scale-95"
           >
             <span>Architecture Docs</span>
+            <span>↗</span>
+          </a>
+        )}
+
+        {project.securityLink && (
+          <a
+            href={project.securityLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-slate-700 bg-slate-800/80 px-3.5 py-2 text-xs font-medium text-slate-300 transition hover:text-white active:scale-95"
+          >
+            <span>Security Model</span>
             <span>↗</span>
           </a>
         )}
@@ -188,9 +201,33 @@ function ProjectCard({ project }: { project: Project }) {
             href={project.contractsLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full border border-slate-700 bg-slate-800/80 px-3.5 py-2 text-xs font-medium text-slate-300 hover:text-white transition active:scale-95"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-slate-700 bg-slate-800/80 px-3.5 py-2 text-xs font-medium text-slate-300 transition hover:text-white active:scale-95"
           >
             <span>Smart Contracts</span>
+            <span>↗</span>
+          </a>
+        )}
+
+        {project.rustTssLink && (
+          <a
+            href={project.rustTssLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-slate-700 bg-slate-800/80 px-3.5 py-2 text-xs font-medium text-slate-300 transition hover:text-white active:scale-95"
+          >
+            <span>Rust TSS Crates</span>
+            <span>↗</span>
+          </a>
+        )}
+
+        {project.sdkLink && (
+          <a
+            href={project.sdkLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-slate-700 bg-slate-800/80 px-3.5 py-2 text-xs font-medium text-slate-300 transition hover:text-white active:scale-95"
+          >
+            <span>TypeScript SDK</span>
             <span>↗</span>
           </a>
         )}
@@ -200,9 +237,11 @@ function ProjectCard({ project }: { project: Project }) {
       {hasDeepDive && (
         <div className="mt-5 border-t border-slate-800/80 pt-4">
           <button
-            onClick={() => setExpanded(!expanded)}
-            className="flex w-full items-center justify-between rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-2.5 text-left text-xs font-bold text-amber-300 hover:bg-slate-800 transition active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-amber-400"
+            type="button"
+            onClick={() => setExpanded((open) => !open)}
+            className="flex min-h-[44px] w-full items-center justify-between rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-2.5 text-left text-xs font-bold text-amber-300 transition hover:bg-slate-800 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-amber-400"
             aria-expanded={expanded}
+            aria-controls={panelId}
           >
             <span className="font-mono uppercase tracking-wider">
               {expanded ? "▾ Collapse Architecture Deep Dive" : "▸ View Full Architecture & Execution Details"}
@@ -212,8 +251,11 @@ function ProjectCard({ project }: { project: Project }) {
             </span>
           </button>
 
-          {expanded && (
-            <div className="mt-4 space-y-4 rounded-xl border border-slate-700/60 bg-[#070b16] p-4 text-xs sm:text-sm">
+          <div
+            id={panelId}
+            hidden={!expanded}
+            className="mt-4 space-y-4 rounded-xl border border-slate-700/60 bg-[#070b16] p-4 text-xs sm:text-sm"
+          >
               {project.architectureDiagram && (
                 <div>
                   <h4 className="font-mono text-[11px] font-bold uppercase tracking-wider text-blue-400">
@@ -375,8 +417,7 @@ function ProjectCard({ project }: { project: Project }) {
                   </pre>
                 </div>
               )}
-            </div>
-          )}
+          </div>
         </div>
       )}
     </article>
@@ -390,25 +431,28 @@ export default function ProjectsSection() {
       className="relative overflow-hidden bg-[#0a0f1d] px-4 py-12 text-slate-100 sm:px-6 sm:py-16"
     >
       {/* Header */}
-      <div className="mx-auto max-w-3xl space-y-3">
+      <Reveal className="mx-auto max-w-3xl space-y-3">
         <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-950/70 px-3 py-1 font-mono text-[11px] font-bold text-emerald-300">
           <span className="h-2 w-2 rounded-full bg-emerald-400" />
           <span>STOP 04 // SELECTED PROJECTS</span>
         </div>
 
         <h2 className="text-2xl font-extrabold uppercase tracking-tight text-white sm:text-4xl">
-          ENGINEERED <span className="text-amber-400">PROJECTS</span>
+          SELECTED <span className="text-amber-400">PROJECTS</span>
         </h2>
         <p className="max-w-xl text-sm leading-relaxed text-slate-300 sm:text-base">
-          Six full-stack, systems, and cryptographic implementations. Preserved in full detail with
-          underlying architecture, verified metrics, execution flows, and repository links.
+          {allProjectList.length} full-stack, systems, and cryptographic implementations. Preserved
+          in full detail with underlying architecture, verified metrics, execution flows, and
+          repository links.
         </p>
-      </div>
+      </Reveal>
 
       {/* Projects Vertical Stack */}
       <div className="mx-auto mt-8 max-w-3xl space-y-8">
-        {allProjectList.map((project) => (
-          <ProjectCard key={project.id} project={project} />
+        {allProjectList.map((project, index) => (
+          <Reveal key={project.id} delay={index * 40}>
+            <ProjectCard project={project} />
+          </Reveal>
         ))}
       </div>
     </section>

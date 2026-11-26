@@ -1,6 +1,7 @@
 "use client";
 
 import { routesData, projects } from "@/data/projects";
+import Reveal from "./reveal";
 
 const routeColorStyles = {
   "route-blue": {
@@ -34,8 +35,9 @@ export default function RoutesSection() {
     const el = document.getElementById(projectId);
     if (el) {
       const yOffset = -70;
-      const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: "smooth" });
+      const y = el.getBoundingClientRect().top + window.scrollY + yOffset;
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: y, behavior: prefersReducedMotion ? "auto" : "smooth" });
     }
   };
 
@@ -45,7 +47,7 @@ export default function RoutesSection() {
       className="relative overflow-hidden bg-[#0a0f1d] px-4 py-12 text-slate-100 sm:px-6 sm:py-16"
     >
       {/* Header */}
-      <div className="mx-auto max-w-3xl space-y-3">
+      <Reveal className="mx-auto max-w-3xl space-y-3">
         <div className="inline-flex items-center gap-2 rounded-full border border-rose-400/40 bg-rose-950/70 px-3 py-1 font-mono text-[11px] font-bold text-rose-300">
           <span className="h-2 w-2 rounded-full bg-rose-400" />
           <span>STOP 03 // THREE ENGINEERING ROUTES</span>
@@ -58,85 +60,87 @@ export default function RoutesSection() {
           Every project connects to one of three core engineering tracks: high-throughput systems,
           AI automation workflows, and cryptographic threshold protocols.
         </p>
-      </div>
+      </Reveal>
 
       {/* Routes Grid */}
       <div className="mx-auto mt-8 max-w-3xl space-y-6">
-        {routesData.map((route) => {
+        {routesData.map((route, index) => {
           const style = routeColorStyles[route.id as keyof typeof routeColorStyles];
 
           return (
-            <article
-              key={route.id}
-              className={`relative overflow-hidden rounded-2xl border ${style.border} ${style.bg} p-5 sm:p-6 backdrop-blur-md shadow-xl`}
-            >
-              {/* Route Line Color Accent Ribbon */}
-              <div className={`absolute top-0 left-0 right-0 h-1.5 ${style.track}`} />
+            <Reveal key={route.id} delay={index * 80}>
+              <article
+                className={`relative overflow-hidden rounded-2xl border ${style.border} ${style.bg} p-5 shadow-xl backdrop-blur-md sm:p-6`}
+              >
+                {/* Route Line Color Accent Ribbon */}
+                <div className={`route-ribbon absolute inset-x-0 top-0 h-1.5 ${style.track}`} />
 
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <span
-                    className={`inline-flex items-center justify-center rounded-lg px-2.5 py-1 font-mono text-xs font-black uppercase tracking-wider ${style.badge}`}
-                  >
-                    {route.name}
-                  </span>
-                  <span className="font-mono text-xs text-slate-400">
-                    Track: {route.slug}
-                  </span>
-                </div>
-              </div>
-
-              <h3 className="mt-3 text-lg font-bold text-white sm:text-xl">
-                {route.title}
-              </h3>
-
-              <p className="mt-2 text-xs sm:text-sm leading-relaxed text-[#f3f1eb]">
-                {route.description}
-              </p>
-
-              {/* Technologies Pill Grid */}
-              <div className="mt-4">
-                <span className="font-mono text-[10px] uppercase tracking-wider text-slate-400">
-                  Core Technologies:
-                </span>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {route.technologies.map((tech) => (
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
                     <span
-                      key={tech}
-                      className={`rounded-full px-2.5 py-0.5 font-mono text-[11px] font-medium border ${style.pill}`}
+                      className={`inline-flex items-center justify-center rounded-lg px-2.5 py-1 font-mono text-xs font-black uppercase tracking-wider ${style.badge}`}
                     >
-                      {tech}
+                      {route.name}
                     </span>
-                  ))}
+                    <span className="font-mono text-xs text-slate-400">
+                      Track: {route.slug}
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              {/* Matching Projects Links */}
-              <div className="mt-5 border-t border-slate-700/60 pt-4">
-                <span className="font-mono text-[10px] uppercase tracking-wider text-amber-300">
-                  Connected Station Projects:
-                </span>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {route.projectKeys.map((pKey) => {
-                    const p = projects[pKey];
-                    if (!p) return null;
-                    return (
-                      <button
-                        key={p.id}
-                        onClick={() => handleScrollToProject(`project-${p.id}`)}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-slate-600 bg-slate-900/90 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:border-amber-400 hover:text-amber-300 transition active:scale-95 focus-visible:outline-2 focus-visible:outline-amber-400"
+                <h3 className="mt-3 text-lg font-bold text-white sm:text-xl">
+                  {route.title}
+                </h3>
+
+                <p className="mt-2 text-xs leading-relaxed text-[#f3f1eb] sm:text-sm">
+                  {route.description}
+                </p>
+
+                {/* Technologies Pill Grid */}
+                <div className="mt-4">
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-slate-400">
+                    Core Technologies:
+                  </span>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {route.technologies.map((tech) => (
+                      <span
+                        key={tech}
+                        className={`rounded-full border px-2.5 py-0.5 font-mono text-[11px] font-medium ${style.pill}`}
                       >
-                        <span className="font-mono text-[10px] text-amber-400">
-                          [{p.stationCode}]
-                        </span>
-                        <span>{p.title}</span>
-                        <span className="text-[10px] text-slate-400">↓</span>
-                      </button>
-                    );
-                  })}
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </article>
+
+                {/* Matching Projects Links */}
+                <div className="mt-5 border-t border-slate-700/60 pt-4">
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-amber-300">
+                    Connected Station Projects:
+                  </span>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {route.projectKeys.map((pKey) => {
+                      const p = projects[pKey];
+                      if (!p) return null;
+                      return (
+                        <button
+                          type="button"
+                          key={p.id}
+                          onClick={() => handleScrollToProject(`project-${p.id}`)}
+                          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-slate-600 bg-slate-900/90 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:border-amber-400 hover:text-amber-300 active:scale-95 focus-visible:outline-2 focus-visible:outline-amber-400"
+                        >
+                          <span className="font-mono text-[10px] text-amber-400">
+                            [{p.stationCode}]
+                          </span>
+                          <span>{p.title}</span>
+                          <span className="text-[10px] text-slate-400">↓</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </article>
+            </Reveal>
           );
         })}
       </div>
