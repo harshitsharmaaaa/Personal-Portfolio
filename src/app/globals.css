@@ -35,3 +35,257 @@ body {
 a {
   text-decoration: none;
 }
+
+/* ---------------------------------------------------------------------------
+   Mobile subway experience
+   Scoped to the mobile portfolio components; the desktop editor keeps its own
+   inline styles and is not affected by these rules.
+--------------------------------------------------------------------------- */
+
+@keyframes subwayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes subwayRise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes subwayLineDraw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes subwayDash {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+
+@keyframes subwayMarkerPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes subwayHalo {
+  from {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+}
+
+@keyframes subwayCountFade {
+  from {
+    opacity: 0.4;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.subway-grid-pattern {
+  background-size: 32px 32px;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+}
+
+.hero-background {
+  animation: subwayFadeIn 1.4s ease-out both;
+}
+
+.hero-enter {
+  animation: subwayRise 760ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-route-path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: subwayLineDraw 2200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-route-dash {
+  animation: subwayDash 2.4s linear infinite;
+}
+
+.hero-route-node {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: subwayMarkerPop 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.mobile-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 700ms ease,
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mobile-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.journey-track {
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 1600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.journey-track.is-drawn,
+.mobile-reveal.is-visible .journey-track {
+  transform: scaleY(1);
+}
+
+.journey-station {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 700ms ease,
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.journey-station.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.station-marker {
+  transform: scale(0.55);
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1) 100ms;
+}
+
+.journey-station.is-visible .station-marker {
+  transform: scale(1);
+}
+
+.station-marker::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 9999px;
+  border: 2px solid currentColor;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.journey-station.is-visible .station-marker::after {
+  animation: subwayHalo 1000ms ease-out 250ms 1;
+}
+
+.route-ribbon {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1) 180ms;
+}
+
+.mobile-reveal.is-visible .route-ribbon {
+  transform: scaleX(1);
+}
+
+.closing-route {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.mobile-reveal.is-visible .closing-route {
+  animation: subwayLineDraw 1800ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.mobile-reveal.is-visible .closing-route:nth-of-type(2) {
+  animation-delay: 120ms;
+}
+
+.mobile-reveal.is-visible .closing-route:nth-of-type(3) {
+  animation-delay: 240ms;
+}
+
+.metric-value {
+  animation: subwayCountFade 280ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .hero-route-dash,
+  .journey-station.is-visible .station-marker::after {
+    animation: none !important;
+  }
+
+  .mobile-reveal,
+  .journey-station {
+    opacity: 1;
+    transform: none;
+  }
+
+  .journey-track {
+    transform: scaleY(1);
+  }
+
+  .station-marker {
+    transform: scale(1);
+  }
+
+  .closing-route {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (scripting: none) {
+  .mobile-reveal,
+  .journey-station {
+    opacity: 1;
+    transform: none;
+  }
+
+  .journey-track {
+    transform: scaleY(1);
+  }
+
+  .station-marker {
+    transform: scale(1);
+  }
+
+  .closing-route {
+    stroke-dashoffset: 0;
+  }
+}
