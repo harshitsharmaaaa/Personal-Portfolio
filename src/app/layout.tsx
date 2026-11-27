@@ -18,9 +18,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Harshit Sharma — Visual Studio Code",
+  title: "Harshit Sharma — Full-Stack & Systems Engineer",
   description:
-    "Portfolio of Harshit Sharma, a VIT Chennai CSE AI & Robotics student building Next.js, TypeScript, Web3, blockchain, and AI SaaS products.",
+    "Portfolio of Harshit Sharma, a VIT Chennai CSE AI & Robotics student building full-stack products, backend systems, sandboxed runtimes and Web3 protocols.",
 };
 
 export default function RootLayout({

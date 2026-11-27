@@ -1,0 +1,229 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 460" preserveAspectRatio="xMidYMax slice" role="img" aria-label="Nighttime city skyline with an illuminated elevated railway bridge">
+  <title>Night city and elevated bridge</title>
+  <desc>A layered nighttime skyline with lit windows, an illuminated bridge, warm street lamps and soft atmospheric haze, drawn for a narrow mobile viewport.</desc>
+
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#040817"/>
+      <stop offset="38%" stop-color="#0a142c"/>
+      <stop offset="72%" stop-color="#1a2b4a"/>
+      <stop offset="100%" stop-color="#3c4560"/>
+    </linearGradient>
+    <radialGradient id="horizonGlow" cx="58%" cy="74%" r="58%">
+      <stop offset="0%" stop-color="#ffc27a" stop-opacity="0.42"/>
+      <stop offset="42%" stop-color="#e9835c" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#0b1428" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="mist" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8fa6c8" stop-opacity="0"/>
+      <stop offset="55%" stop-color="#7d93b8" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#263754" stop-opacity="0.05"/>
+    </linearGradient>
+    <linearGradient id="farBuilding" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#425b86"/>
+      <stop offset="100%" stop-color="#22345a"/>
+    </linearGradient>
+    <linearGradient id="midBuilding" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2b416c"/>
+      <stop offset="100%" stop-color="#142442"/>
+    </linearGradient>
+    <linearGradient id="bridgeDeck" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#44536f"/>
+      <stop offset="38%" stop-color="#222e48"/>
+      <stop offset="100%" stop-color="#0c1426"/>
+    </linearGradient>
+    <linearGradient id="street" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#101a30"/>
+      <stop offset="100%" stop-color="#040814"/>
+    </linearGradient>
+    <radialGradient id="lamp" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffd99a" stop-opacity="0.9"/>
+      <stop offset="38%" stop-color="#ffb765" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#ff9f52" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <filter id="tinyGlow" x="-120%" y="-120%" width="340%" height="340%">
+      <feGaussianBlur stdDeviation="1.6"/>
+    </filter>
+    <pattern id="windowsFar" width="9" height="12" patternUnits="userSpaceOnUse">
+      <rect x="2" y="3" width="3" height="4" fill="#ffc98d" opacity="0.42"/>
+    </pattern>
+    <pattern id="windowsMid" width="11" height="15" patternUnits="userSpaceOnUse">
+      <rect x="2.5" y="4" width="4" height="6" rx="0.5" fill="#ffd39b" opacity="0.62"/>
+      <rect x="7" y="4" width="1.6" height="6" fill="#9fc4ff" opacity="0.32"/>
+    </pattern>
+
+    <style>
+      .star { animation: starTwinkle 5.5s ease-in-out infinite; transform-origin: center; }
+      .win-a { animation: windowPulse 6s ease-in-out infinite alternate; }
+      .win-b { animation: windowPulse 7.5s ease-in-out -2s infinite alternate; }
+      .bridge-light { animation: lampPulse 4s ease-in-out infinite alternate; }
+      .street-lamp { animation: lampPulse 3.2s ease-in-out -1s infinite alternate; }
+      @keyframes starTwinkle { 0%, 100% { opacity: 0.28; } 50% { opacity: 0.9; } }
+      @keyframes windowPulse { 0% { opacity: 0.34; } 100% { opacity: 0.85; } }
+      @keyframes lampPulse { 0% { opacity: 0.55; } 100% { opacity: 1; } }
+      @media (prefers-reduced-motion: reduce) {
+        .star, .win-a, .win-b, .bridge-light, .street-lamp { animation: none; }
+      }
+    </style>
+  </defs>
+
+  <!-- Deep night sky and horizon warmth -->
+  <rect width="390" height="460" fill="url(#sky)"/>
+  <rect width="390" height="460" fill="url(#horizonGlow)"/>
+
+  <!-- Stars, deliberately sparse -->
+  <g fill="#d7e5ff">
+    <circle class="star" cx="28" cy="52" r="1.1" style="animation-delay:0.2s"/>
+    <circle class="star" cx="74" cy="30" r="0.8" style="animation-delay:1.4s"/>
+    <circle class="star" cx="118" cy="76" r="1.3" style="animation-delay:2.6s"/>
+    <circle class="star" cx="168" cy="42" r="0.7" style="animation-delay:0.9s"/>
+    <circle class="star" cx="207" cy="88" r="1" style="animation-delay:3.1s"/>
+    <circle class="star" cx="246" cy="34" r="0.9" style="animation-delay:1.8s"/>
+    <circle class="star" cx="338" cy="58" r="1.2" style="animation-delay:2.2s"/>
+    <circle class="star" cx="372" cy="106" r="0.8" style="animation-delay:0.5s"/>
+    <circle class="star" cx="54" cy="122" r="0.7" style="animation-delay:3.6s"/>
+  </g>
+
+  <!-- Moon with a cool halo -->
+  <g>
+    <circle cx="322" cy="82" r="34" fill="#b9cdf5" opacity="0.07" filter="url(#softGlow)"/>
+    <circle cx="322" cy="82" r="17" fill="#dbe6ff" opacity="0.9"/>
+    <circle cx="328" cy="77" r="17" fill="#0b1630" opacity="0.86"/>
+    <circle cx="322" cy="82" r="17" fill="none" stroke="#e6eeff" stroke-opacity="0.35" stroke-width="0.8"/>
+  </g>
+
+  <!-- The built environment is lifted in the frame so the skyline and bridge
+       stay visible above the train on a narrow phone screen. -->
+  <g transform="translate(0 -78)">
+  <!-- Distant skyline: low-contrast silhouettes -->
+  <g opacity="0.78">
+    <path fill="url(#farBuilding)" d="M0 318 V272 H18 V246 H36 V272 H52 V228 H74 V262 H92 V236 H112 V278 H130 V250 H152 V286 H172 V232 H196 V270 H214 V244 H238 V284 H258 V256 H282 V274 H300 V238 H324 V280 H344 V254 H366 V288 H390 V318 Z"/>
+    <path fill="url(#windowsFar)" d="M0 280 H390 V318 H0 Z" opacity="0.5"/>
+    <g class="win-a">
+      <rect x="54" y="236" width="3" height="4" fill="#ffd49d" opacity="0.5"/>
+      <rect x="63" y="244" width="3" height="4" fill="#ffd49d" opacity="0.35"/>
+      <rect x="177" y="240" width="3" height="4" fill="#ffd49d" opacity="0.45"/>
+      <rect x="306" y="246" width="3" height="4" fill="#ffd49d" opacity="0.4"/>
+    </g>
+  </g>
+
+  <!-- Mid skyline: layered blocks, towers and lit window grids -->
+  <g>
+    <path fill="url(#midBuilding)" d="M0 336 V288 H26 V252 H62 V300 H80 V222 H104 V264 H128 V238 H150 V306 H176 V268 H200 V244 H228 V300 H250 V258 H274 V286 H296 V232 H318 V274 H342 V248 H368 V304 H390 V336 Z"/>
+    <g opacity="0.9">
+      <rect x="26" y="256" width="36" height="80" fill="url(#windowsMid)"/>
+      <rect x="80" y="228" width="24" height="72" fill="url(#windowsMid)"/>
+      <rect x="128" y="244" width="22" height="62" fill="url(#windowsMid)"/>
+      <rect x="200" y="250" width="28" height="50" fill="url(#windowsMid)"/>
+      <rect x="250" y="264" width="24" height="42" fill="url(#windowsMid)"/>
+      <rect x="296" y="238" width="22" height="48" fill="url(#windowsMid)"/>
+      <rect x="342" y="254" width="26" height="50" fill="url(#windowsMid)"/>
+    </g>
+    <!-- Rooftop details: antennae, tanks and crowns -->
+    <g stroke="#2a3e62" stroke-width="1.4" fill="none">
+      <path d="M92 222 V204 M88 212 H96"/>
+      <path d="M307 232 V216 M303 224 H311"/>
+      <path d="M16 288 V276"/>
+    </g>
+    <g class="win-b">
+      <rect x="84" y="238" width="4" height="6" fill="#ffd7a3" opacity="0.7"/>
+      <rect x="84" y="258" width="4" height="6" fill="#ffd7a3" opacity="0.5"/>
+      <rect x="134" y="256" width="4" height="6" fill="#ffd7a3" opacity="0.6"/>
+      <rect x="205" y="264" width="4" height="6" fill="#ffd7a3" opacity="0.55"/>
+      <rect x="302" y="250" width="4" height="6" fill="#ffd7a3" opacity="0.65"/>
+      <rect x="352" y="270" width="4" height="6" fill="#ffd7a3" opacity="0.5"/>
+    </g>
+  </g>
+
+  <!-- Atmospheric haze between skyline and bridge -->
+  <rect y="286" width="390" height="128" fill="url(#mist)"/>
+
+  <!-- Elevated railway bridge: deck, parapet, columns and bracing -->
+  <g>
+    <ellipse cx="196" cy="334" rx="210" ry="26" fill="#ffc07a" opacity="0.06" filter="url(#softGlow)"/>
+    <rect x="0" y="322" width="390" height="12" fill="url(#bridgeDeck)"/>
+    <rect x="0" y="320" width="390" height="2.5" fill="#7d8ca9" opacity="0.55"/>
+    <rect x="0" y="334" width="390" height="3" fill="#060d1c" opacity="0.9"/>
+    <!-- Parapet with evenly spaced uprights -->
+    <g stroke="#3d4b69" stroke-width="2" fill="none">
+      <path d="M0 314 H390"/>
+      <path d="M12 314 V322 M42 314 V322 M72 314 V322 M102 314 V322 M132 314 V322 M162 314 V322 M192 314 V322 M222 314 V322 M252 314 V322 M282 314 V322 M312 314 V322 M342 314 V322 M372 314 V322"/>
+    </g>
+    <!-- Support columns and diagonal bracing -->
+    <g>
+      <rect x="58" y="337" width="17" height="123" fill="#0c152a"/>
+      <rect x="58" y="337" width="4" height="123" fill="#2a3a5a" opacity="0.7"/>
+      <rect x="244" y="337" width="17" height="123" fill="#0c152a"/>
+      <rect x="244" y="337" width="4" height="123" fill="#2a3a5a" opacity="0.7"/>
+      <path d="M75 356 L153 428 M75 428 L153 356" stroke="#16233d" stroke-width="3"/>
+      <path d="M261 356 L339 428 M261 428 L339 356" stroke="#16233d" stroke-width="3"/>
+      <rect x="48" y="432" width="37" height="8" fill="#080f20"/>
+      <rect x="234" y="432" width="37" height="8" fill="#080f20"/>
+    </g>
+    <!-- Bridge lamp posts with warm pools of light -->
+    <g>
+      <g transform="translate(30 0)">
+        <rect x="0" y="296" width="2" height="24" fill="#475573"/>
+        <circle class="bridge-light" cx="1" cy="295" r="3" fill="#ffd08a"/>
+        <circle class="bridge-light" cx="1" cy="295" r="15" fill="url(#lamp)"/>
+      </g>
+      <g transform="translate(150 0)">
+        <rect x="0" y="296" width="2" height="24" fill="#475573"/>
+        <circle class="bridge-light" cx="1" cy="295" r="3" fill="#ffd08a" style="animation-delay:0.8s"/>
+        <circle class="bridge-light" cx="1" cy="295" r="15" fill="url(#lamp)" style="animation-delay:0.8s"/>
+      </g>
+      <g transform="translate(270 0)">
+        <rect x="0" y="296" width="2" height="24" fill="#475573"/>
+        <circle class="bridge-light" cx="1" cy="295" r="3" fill="#ffd08a" style="animation-delay:1.7s"/>
+        <circle class="bridge-light" cx="1" cy="295" r="15" fill="url(#lamp)" style="animation-delay:1.7s"/>
+      </g>
+      <g transform="translate(370 0)">
+        <rect x="0" y="296" width="2" height="24" fill="#475573"/>
+        <circle class="bridge-light" cx="1" cy="295" r="3" fill="#ffd08a" style="animation-delay:2.5s"/>
+        <circle class="bridge-light" cx="1" cy="295" r="15" fill="url(#lamp)" style="animation-delay:2.5s"/>
+      </g>
+    </g>
+    <!-- A distant train crossing the bridge gives scale -->
+    <g opacity="0.72">
+      <rect x="198" y="303" width="60" height="17" rx="3" fill="#243554"/>
+      <rect x="202" y="306" width="11" height="8" rx="1.5" fill="#ffcd8f" opacity="0.75"/>
+      <rect x="216" y="306" width="11" height="8" rx="1.5" fill="#ffcd8f" opacity="0.6"/>
+      <rect x="230" y="306" width="11" height="8" rx="1.5" fill="#ffcd8f" opacity="0.7"/>
+      <rect x="244" y="306" width="11" height="8" rx="1.5" fill="#ffcd8f" opacity="0.55"/>
+      <circle cx="208" cy="321" r="2" fill="#0a1224"/>
+      <circle cx="248" cy="321" r="2" fill="#0a1224"/>
+    </g>
+  </g>
+
+  <!-- Street level, lamps and foreground depth -->
+  <g>
+    <rect y="414" width="390" height="46" fill="url(#street)"/>
+    <path d="M0 432 Q 195 408 390 432" fill="none" stroke="#2c3c5c" stroke-width="1" opacity="0.5"/>
+    <g>
+      <g transform="translate(20 414)">
+        <rect x="0" y="-52" width="2" height="52" fill="#33425f"/>
+        <path d="M1 -52 Q 10 -58 18 -52" fill="none" stroke="#33425f" stroke-width="2"/>
+        <circle class="street-lamp" cx="18" cy="-51" r="2.6" fill="#ffd69a"/>
+        <circle class="street-lamp" cx="18" cy="-51" r="20" fill="url(#lamp)"/>
+      </g>
+      <g transform="translate(360 414)">
+        <rect x="0" y="-46" width="2" height="46" fill="#33425f"/>
+        <path d="M1 -46 Q -8 -52 -16 -46" fill="none" stroke="#33425f" stroke-width="2"/>
+        <circle class="street-lamp" cx="-16" cy="-45" r="2.6" fill="#ffd69a" style="animation-delay:1.4s"/>
+        <circle class="street-lamp" cx="-16" cy="-45" r="20" fill="url(#lamp)" style="animation-delay:1.4s"/>
+      </g>
+    </g>
+    <!-- Foreground silhouettes: platform canopy struts and shrubs -->
+    <path d="M0 460 V438 Q 12 430 24 442 Q 32 434 42 444 L 46 460 Z" fill="#040814"/>
+    <path d="M390 460 V444 Q 378 432 366 442 Q 356 436 346 448 L 342 460 Z" fill="#040814"/>
+    <g stroke="#060c1b" stroke-width="5" opacity="0.95">
+      <path d="M108 460 V424 M118 460 V430"/>
+      <path d="M286 460 V428 M296 460 V434"/>
+    </g>
+  </g>
+  </g>
+  <rect y="382" width="390" height="78" fill="url(#street)"/>
+</svg>

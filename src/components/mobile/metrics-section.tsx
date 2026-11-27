@@ -28,7 +28,6 @@ function useCountUp(target: number, active: boolean, duration = 900) {
 
   useEffect(() => {
     if (!active) return;
-
     const node = ref.current;
     if (!node) return;
 
@@ -42,7 +41,6 @@ function useCountUp(target: number, active: boolean, duration = 900) {
       ([entry]) => {
         if (!entry.isIntersecting) return;
         observer.disconnect();
-
         const start = performance.now();
         const tick = (now: number) => {
           const progress = Math.min(1, (now - start) / duration);
@@ -50,11 +48,10 @@ function useCountUp(target: number, active: boolean, duration = 900) {
           setValue(Math.round(target * eased));
           if (progress < 1) frame = requestAnimationFrame(tick);
         };
-
         setValue(0);
         frame = requestAnimationFrame(tick);
       },
-      { threshold: 0.4 }
+      { threshold: 0.4 },
     );
 
     observer.observe(node);
@@ -76,29 +73,14 @@ function MetricCard({ metric }: { metric: Metric }) {
   const display = hasNumber ? `${value}${suffix}` : metric.value;
 
   return (
-    <div
-      ref={ref}
-      className={`flex h-full flex-col justify-between rounded-xl border ${metric.color} p-4 shadow-md backdrop-blur-sm sm:p-5`}
-    >
-      <div>
-        <div className="flex items-center justify-between">
-          <span className="font-mono text-[9px] font-bold uppercase tracking-widest text-slate-400">
-            {metric.badge}
-          </span>
-          <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" />
-        </div>
-        <div className="mt-2 font-mono text-2xl font-black tracking-tight sm:text-4xl">
-          <span className="sr-only">{metric.value}</span>
-          <span aria-hidden="true">{display}</span>
-        </div>
+    <div ref={ref} className="rail-metric" style={{ "--metric-color": metric.color } as React.CSSProperties}>
+      <span className="rail-metric__badge">{metric.badge}</span>
+      <div className="rail-metric__value">
+        <span className="sr-only">{metric.value}</span>
+        <span aria-hidden="true">{display}</span>
       </div>
-
-      <div className="mt-3">
-        <div className="text-xs font-bold leading-tight text-white">{metric.label}</div>
-        <div className="mt-1 font-mono text-[10px] leading-tight text-slate-400">
-          {metric.detail}
-        </div>
-      </div>
+      <div className="rail-metric__label">{metric.label}</div>
+      <p className="rail-metric__detail">{metric.detail}</p>
     </div>
   );
 }
@@ -108,7 +90,7 @@ export default function MetricsSection() {
   const mergedRepositories = new Set(
     contributions
       .filter((contribution) => getContributionStatus(contribution) === "merged")
-      .map((contribution) => contribution.repository)
+      .map((contribution) => contribution.repository),
   );
 
   const keymesh = projects["projects/keymesh.ts"];
@@ -119,11 +101,11 @@ export default function MetricsSection() {
     keymesh.metrics?.find((metric) => metric.label === "Foundry Tests")?.value ?? "268+";
   const sandboxedLanguages = leadingNumber(
     blackbox.metrics?.find((metric) => metric.label === "Languages")?.value,
-    "4"
+    "4",
   );
   const rateLimitAlgorithms = leadingNumber(
     rateLimiter.highlights.find((highlight) => highlight.startsWith("4 algorithms")),
-    "4"
+    "4",
   );
 
   const metricsGrid: Metric[] = [
@@ -132,70 +114,59 @@ export default function MetricsSection() {
       value: `${ossMetrics.merged}`,
       badge: "OSS",
       detail: `Across ${mergedRepositories.size} repositories; Draco #9/#11 cover overlapping work.`,
-      color: "border-emerald-500/40 bg-emerald-950/30 text-emerald-400",
+      color: "#34c78b",
     },
     {
       label: "Upstream Repositories",
       value: `${ossMetrics.repositories}`,
       badge: "CODEBASE",
       detail: `${ossMetrics.repositories} repositories with PR activity; ${mergedRepositories.size} contain merged work.`,
-      color: "border-blue-500/40 bg-blue-950/30 text-blue-400",
+      color: "#4f8cff",
     },
     {
       label: "Foundry Contract Tests",
       value: foundryTests,
       badge: "SECURITY",
       detail: "Invariants & fuzz testing across 13 test suites in KEYMESH",
-      color: "border-amber-400/40 bg-amber-950/30 text-amber-400",
+      color: "#f4c04f",
     },
     {
       label: "Engineered Projects",
       value: `${allProjectList.length}`,
       badge: "FULL-STACK",
       detail: "Sandboxed runtimes, threshold cryptography & AI automation",
-      color: "border-purple-500/40 bg-purple-950/30 text-purple-400",
+      color: "#b58cff",
     },
     {
       label: "Sandboxed Languages",
       value: sandboxedLanguages,
       badge: "SYSTEMS",
       detail: "Python, Node.js, C++, and Java in TheBlackBox runner",
-      color: "border-cyan-500/40 bg-cyan-950/30 text-cyan-400",
+      color: "#67c9e8",
     },
     {
       label: "Rate-Limit Algorithms",
       value: rateLimitAlgorithms,
       badge: "DISTRIBUTED",
       detail: "Fixed Window, Sliding Window, Token Bucket, Leaky Bucket",
-      color: "border-rose-500/40 bg-rose-950/30 text-rose-400",
+      color: "#f05257",
     },
   ];
 
   return (
-    <section
-      id="metrics"
-      className="relative overflow-hidden bg-[#0a0f1d] px-4 py-12 text-slate-100 sm:px-6 sm:py-16"
-    >
-      {/* Header */}
-      <Reveal className="mx-auto max-w-3xl space-y-3">
-        <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-950/70 px-3 py-1 font-mono text-[11px] font-bold text-amber-300">
-          <span className="h-2 w-2 rounded-full bg-amber-400" />
-          <span>STOP 06 // SYSTEM METRICS</span>
-        </div>
-
-        <h2 className="text-2xl font-extrabold uppercase tracking-tight text-white sm:text-4xl">
-          ENGINEERING AT A <span className="text-amber-400">GLANCE</span>
-        </h2>
-        <p className="max-w-xl text-sm leading-relaxed text-slate-300 sm:text-base">
-          Quantifiable milestones derived strictly from verified project implementations,
-          cryptographic test suites, and merged open-source pull requests.
+    <section id="metrics" className="rail-section rail-section--metrics" aria-labelledby="metrics-heading">
+      <Reveal className="rail-section__head">
+        <p className="rail-eyebrow"><span className="rail-eyebrow__dot" aria-hidden="true" /> STOP 07 <span className="rail-eyebrow__sep">·</span> SYSTEM METRICS</p>
+        <h2 id="metrics-heading">By the <span>numbers.</span></h2>
+        <p className="rail-section__intro">
+          Quantifiable milestones derived strictly from verified implementations, test suites and
+          merged pull requests.
         </p>
       </Reveal>
 
-      {/* Metrics Transit Grid */}
-      <div className="mx-auto mt-8 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+      <div className="rail-metrics">
         {metricsGrid.map((metric, index) => (
-          <Reveal key={metric.label} className="h-full" delay={index * 45}>
+          <Reveal key={metric.label} delay={index * 40}>
             <MetricCard metric={metric} />
           </Reveal>
         ))}

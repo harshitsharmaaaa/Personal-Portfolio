@@ -7,10 +7,12 @@ export default function Reveal({
   children,
   className = "",
   delay = 0,
+  style,
 }: {
   children: React.ReactNode;
   className?: string;
   delay?: number;
+  style?: React.CSSProperties;
 }) {
   const active = useMobileActive();
   const ref = useRef<HTMLDivElement>(null);
@@ -44,8 +46,8 @@ export default function Reveal({
   return (
     <div
       ref={ref}
-      className={`mobile-reveal ${visible ? "is-visible" : ""} ${className}`}
-      style={delay ? { transitionDelay: `${delay}ms` } : undefined}
+      className={`rail-reveal ${visible ? "is-visible" : ""} ${className}`}
+      style={delay ? { ...style, transitionDelay: `${delay}ms` } : style}
     >
       {children}
     </div>
