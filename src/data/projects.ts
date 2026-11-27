@@ -446,7 +446,7 @@ export const profile = {
   resume: "https://drive.google.com/file/d/1wS3CkyxfTZw1rLHuu3ZULIuC1gVvRXNA/view?usp=sharing",
   github: "https://github.com/harshitsharmaaaa/",
   linkedin: "https://www.linkedin.com/in/harshit-sharma-46a210341/",
-  twitter: "https://x.com/Harshit_Codess",
+  twitter: "https://x.com/_En8O_",
   values: ["ship fast", "understand deeply", "avoid unnecessary process"],
 } as const;
 

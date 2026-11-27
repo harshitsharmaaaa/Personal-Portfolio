@@ -1,148 +1,90 @@
 "use client";
 
-import { routesData, projects } from "@/data/projects";
+import { projects, routesData } from "@/data/projects";
+import { selectProject } from "@/data/railway";
 import Reveal from "./reveal";
 
-const routeColorStyles = {
-  "route-blue": {
-    badge: "bg-blue-600 text-white",
-    border: "border-blue-500/50",
-    bg: "bg-[#0b1736]",
-    accent: "text-blue-400",
-    track: "bg-blue-500",
-    pill: "border-blue-500/40 bg-blue-950/60 text-blue-200",
-  },
-  "route-red": {
-    badge: "bg-rose-600 text-white",
-    border: "border-rose-500/50",
-    bg: "bg-[#240c14]",
-    accent: "text-rose-400",
-    track: "bg-rose-500",
-    pill: "border-rose-500/40 bg-rose-950/60 text-rose-200",
-  },
-  "route-green": {
-    badge: "bg-emerald-600 text-white",
-    border: "border-emerald-500/50",
-    bg: "bg-[#08211b]",
-    accent: "text-emerald-400",
-    track: "bg-emerald-500",
-    pill: "border-emerald-500/40 bg-emerald-950/60 text-emerald-200",
-  },
-} as const;
+const categoryLabels: Record<string, string> = {
+  "backend-systems": "Backend & systems engineering",
+  "ai-automation": "AI & automation engineering",
+  "blockchain-web3": "Blockchain & Web3 engineering",
+};
 
 export default function RoutesSection() {
-  const handleScrollToProject = (projectId: string) => {
-    const el = document.getElementById(projectId);
-    if (el) {
-      const yOffset = -70;
-      const y = el.getBoundingClientRect().top + window.scrollY + yOffset;
-      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      window.scrollTo({ top: y, behavior: prefersReducedMotion ? "auto" : "smooth" });
-    }
-  };
-
   return (
-    <section
-      id="routes"
-      className="relative overflow-hidden bg-[#0a0f1d] px-4 py-12 text-slate-100 sm:px-6 sm:py-16"
-    >
-      {/* Header */}
-      <Reveal className="mx-auto max-w-3xl space-y-3">
-        <div className="inline-flex items-center gap-2 rounded-full border border-rose-400/40 bg-rose-950/70 px-3 py-1 font-mono text-[11px] font-bold text-rose-300">
-          <span className="h-2 w-2 rounded-full bg-rose-400" />
-          <span>STOP 03 // THREE ENGINEERING ROUTES</span>
-        </div>
-
-        <h2 className="text-2xl font-extrabold uppercase tracking-tight text-white sm:text-4xl">
-          THREE SPECIALIZED <span className="text-amber-400">TRANSIT LINES</span>
-        </h2>
-        <p className="max-w-xl text-sm leading-relaxed text-slate-300 sm:text-base">
-          Every project connects to one of three core engineering tracks: high-throughput systems,
-          AI automation workflows, and cryptographic threshold protocols.
+    <section id="routes" className="rail-section rail-section--routes" aria-labelledby="routes-heading">
+      <Reveal className="rail-section__head">
+        <p className="rail-eyebrow"><span className="rail-eyebrow__dot" aria-hidden="true" /> THREE LINES <span className="rail-eyebrow__sep">·</span> ONE PRACTICE</p>
+        <h2 id="routes-heading">Three lines, <span>one practice.</span></h2>
+        <p className="rail-section__intro">
+          Systems, automation and cryptography are not side projects here. They are three connected
+          disciplines with the same engineering standard.
         </p>
       </Reveal>
 
-      {/* Routes Grid */}
-      <div className="mx-auto mt-8 max-w-3xl space-y-6">
-        {routesData.map((route, index) => {
-          const style = routeColorStyles[route.id as keyof typeof routeColorStyles];
+      <div className="rail-routes">
+        {routesData.map((route, index) => (
+          <Reveal key={route.id} delay={index * 90}>
+            <article
+              id={route.id}
+              className="rail-route"
+              style={{ "--route-color": route.color } as React.CSSProperties}
+              aria-labelledby={`${route.id}-title`}
+            >
+              <div className="rail-route__edge" aria-hidden="true"><span /></div>
 
-          return (
-            <Reveal key={route.id} delay={index * 80}>
-              <article
-                className={`relative overflow-hidden rounded-2xl border ${style.border} ${style.bg} p-5 shadow-xl backdrop-blur-md sm:p-6`}
+              <div className="rail-route__masthead">
+                <span className="rail-route__number">0{index + 1}</span>
+                <div className="rail-route__identity">
+                  <span className="rail-route__line">{route.name.toUpperCase()}</span>
+                  <span className="rail-route__category">{categoryLabels[route.slug]}</span>
+                </div>
+                <span className="rail-route__badge">
+                  {route.projectKeys.length} {route.projectKeys.length === 1 ? "STOP" : "STOPS"}
+                </span>
+              </div>
+
+              <h3 id={`${route.id}-title`}>{route.title}</h3>
+              <p className="rail-route__description">{route.description}</p>
+
+              <div className="rail-route__tech">
+                <span className="rail-block-label">CORE TECHNOLOGIES</span>
+                <div>{route.technologies.map((tech) => <span key={tech}>{tech}</span>)}</div>
+              </div>
+
+              <div className="rail-route__stops">
+                <span className="rail-block-label">CONNECTED STOPS</span>
+                <div>
+                  {route.projectKeys.map((key) => {
+                    const project = projects[key];
+                    if (!project) return null;
+                    return (
+                      <button key={project.id} type="button" onClick={() => selectProject(project.id)}>
+                        <span className="rail-route__stop-code">{project.stationCode}</span>
+                        <span>{project.title}</span>
+                        <span aria-hidden="true">↗</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="rail-route__action"
+                onClick={() => {
+                  const first = projects[route.projectKeys[0]];
+                  if (first) selectProject(first.id);
+                }}
               >
-                {/* Route Line Color Accent Ribbon */}
-                <div className={`route-ribbon absolute inset-x-0 top-0 h-1.5 ${style.track}`} />
-
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <span
-                      className={`inline-flex items-center justify-center rounded-lg px-2.5 py-1 font-mono text-xs font-black uppercase tracking-wider ${style.badge}`}
-                    >
-                      {route.name}
-                    </span>
-                    <span className="font-mono text-xs text-slate-400">
-                      Track: {route.slug}
-                    </span>
-                  </div>
-                </div>
-
-                <h3 className="mt-3 text-lg font-bold text-white sm:text-xl">
-                  {route.title}
-                </h3>
-
-                <p className="mt-2 text-xs leading-relaxed text-[#f3f1eb] sm:text-sm">
-                  {route.description}
-                </p>
-
-                {/* Technologies Pill Grid */}
-                <div className="mt-4">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-slate-400">
-                    Core Technologies:
-                  </span>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {route.technologies.map((tech) => (
-                      <span
-                        key={tech}
-                        className={`rounded-full border px-2.5 py-0.5 font-mono text-[11px] font-medium ${style.pill}`}
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Matching Projects Links */}
-                <div className="mt-5 border-t border-slate-700/60 pt-4">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-amber-300">
-                    Connected Station Projects:
-                  </span>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {route.projectKeys.map((pKey) => {
-                      const p = projects[pKey];
-                      if (!p) return null;
-                      return (
-                        <button
-                          type="button"
-                          key={p.id}
-                          onClick={() => handleScrollToProject(`project-${p.id}`)}
-                          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-slate-600 bg-slate-900/90 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:border-amber-400 hover:text-amber-300 active:scale-95 focus-visible:outline-2 focus-visible:outline-amber-400"
-                        >
-                          <span className="font-mono text-[10px] text-amber-400">
-                            [{p.stationCode}]
-                          </span>
-                          <span>{p.title}</span>
-                          <span className="text-[10px] text-slate-400">↓</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </article>
-            </Reveal>
-          );
-        })}
+                <span>RIDE THIS LINE</span>
+                <svg viewBox="0 0 24 24" className="rail-icon" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M5 12h13M13 6l6 6-6 6" />
+                </svg>
+              </button>
+            </article>
+          </Reveal>
+        ))}
       </div>
     </section>
   );

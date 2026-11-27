@@ -2,16 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { profile } from "@/data/projects";
+import { scrollToId } from "@/data/railway";
 import Reveal from "./reveal";
 
 export default function ContactSection() {
   const [copied, setCopied] = useState(false);
   const copyTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    return () => {
-      if (copyTimeout.current) clearTimeout(copyTimeout.current);
-    };
+  useEffect(() => () => {
+    if (copyTimeout.current) clearTimeout(copyTimeout.current);
   }, []);
 
   const handleCopyEmail = async () => {
@@ -20,7 +19,6 @@ export default function ContactSection() {
       await navigator.clipboard.writeText(profile.email);
       success = true;
     } catch {
-      // Fallback for older browsers
       const textArea = document.createElement("textarea");
       textArea.value = profile.email;
       textArea.style.position = "fixed";
@@ -31,7 +29,7 @@ export default function ContactSection() {
         document.execCommand("copy");
         success = true;
       } catch {
-        // Copy failed silently
+        // Copy is best-effort.
       }
       document.body.removeChild(textArea);
     }
@@ -42,164 +40,72 @@ export default function ContactSection() {
     }
   };
 
-  const handleScrollTop = () => {
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    window.scrollTo({ top: 0, behavior: prefersReducedMotion ? "auto" : "smooth" });
-  };
-
   return (
-    <section
-      id="contact"
-      className="relative overflow-hidden bg-[#070b16] px-4 py-16 text-slate-100 sm:px-6 sm:py-24"
-    >
-      {/* Decorative Closing Route Convergence Lines */}
-      <Reveal className="pointer-events-none absolute inset-0 z-0">
-        <div className="h-full w-full opacity-20">
-          <svg
-            className="h-full w-full"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 400 400"
-            preserveAspectRatio="none"
-          >
-            <path
-              className="closing-route"
-              pathLength={1}
-              d="M 50,0 Q 150,150 200,200"
-              fill="none"
-              stroke="#3b82f6"
-              strokeWidth="4"
-            />
-            <path
-              className="closing-route"
-              pathLength={1}
-              d="M 200,0 L 200,200"
-              fill="none"
-              stroke="#fbbf24"
-              strokeWidth="4"
-            />
-            <path
-              className="closing-route"
-              pathLength={1}
-              d="M 350,0 Q 250,150 200,200"
-              fill="none"
-              stroke="#10b981"
-              strokeWidth="4"
-            />
-            <circle cx="200" cy="200" r="12" fill="#fbbf24" stroke="#ffffff" strokeWidth="4" />
-          </svg>
-        </div>
-      </Reveal>
+    <section id="contact" className="rail-section rail-section--contact" aria-labelledby="contact-heading">
+      <div className="rail-contact__convergence" aria-hidden="true">
+        <svg viewBox="0 0 400 320" preserveAspectRatio="xMidYMax slice">
+          <path d="M20 0 C 90 120, 160 210, 200 280" fill="none" stroke="#4f8cff" strokeWidth="3" />
+          <path d="M200 0 V280" fill="none" stroke="#f4c04f" strokeWidth="3" />
+          <path d="M380 0 C 310 120, 240 210, 200 280" fill="none" stroke="#34c78b" strokeWidth="3" />
+          <circle cx="200" cy="280" r="14" fill="#f4c04f" stroke="#fff3d6" strokeWidth="3" />
+        </svg>
+      </div>
 
-      <Reveal className="relative z-10 mx-auto max-w-3xl space-y-6 text-center">
-        {/* Terminal Station Badge */}
-        <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-950/70 px-3.5 py-1 font-mono text-[11px] font-bold text-cyan-300">
-          <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
-          <span>STOP 07 // TERMINAL STATION</span>
-        </div>
+      <Reveal className="rail-contact__inner">
+        <p className="rail-eyebrow"><span className="rail-eyebrow__dot" aria-hidden="true" /> FINAL STOP <span className="rail-eyebrow__sep">·</span> TERMINAL</p>
+        <h2 id="contact-heading">End of the line.<br /><span>Let&apos;s build something.</span></h2>
+        <p className="rail-contact__intro">
+          Have a system to design, an upstream bug to fix, or a role in mind? The next departure is
+          one conversation away.
+        </p>
 
-        {/* Dramatic Closing Headline */}
-        <div className="space-y-2">
-          <h2 className="text-3xl font-extrabold uppercase tracking-tight text-white sm:text-5xl">
-            LET&apos;S BUILD <span className="text-amber-400">SOMETHING</span>
-          </h2>
-          <p className="mx-auto max-w-lg text-sm leading-relaxed text-slate-300 sm:text-base">
-            End of the line. Have a system to build, an upstream bug to fix, or a role in mind?
-            Start a conversation.
-          </p>
-        </div>
-
-        {/* Copy Email Primary CTA Box */}
-        <div className="mx-auto max-w-md rounded-2xl border border-amber-400/30 bg-[#0d162b] p-5 shadow-2xl backdrop-blur-md">
-          <div className="mb-3 flex items-center justify-between border-b border-slate-700 pb-2">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-amber-400">
-              DISPATCH CHANNEL
-            </span>
-            <span className="font-mono text-[10px] text-slate-400">EMAIL</span>
-          </div>
-
-          <div className="font-mono text-sm sm:text-base font-bold text-white break-all">
-            {profile.email}
-          </div>
-
-          <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
-            <button
-              type="button"
-              onClick={handleCopyEmail}
-              className="flex h-11 min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-full bg-amber-400 px-4 text-xs font-bold text-[#0a0f1d] transition hover:bg-amber-300 active:scale-95 focus-visible:outline-2 focus-visible:outline-amber-400 sm:flex-1"
-            >
-              <span>{copied ? "Copied to Clipboard! ✓" : "Copy Email Address"}</span>
+        <div className="rail-contact__destinations">
+          <a href={`mailto:${profile.email}`} className="rail-contact__main">
+            <span className="rail-contact__main-label">EMAIL</span>
+            <span className="rail-contact__main-value">{profile.email}</span>
+            <span className="rail-contact__main-arrow" aria-hidden="true">↗</span>
+          </a>
+          <div className="rail-contact__side">
+            <button type="button" onClick={handleCopyEmail}>
+              {copied ? "COPIED ✓" : "COPY ADDRESS"}
             </button>
             <span className="sr-only" role="status" aria-live="polite">
               {copied ? "Email address copied to clipboard." : ""}
             </span>
-
-            <a
-              href={`mailto:${profile.email}`}
-              className="flex h-11 min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-full border border-slate-600 bg-slate-800/80 px-4 text-xs font-semibold text-white transition hover:border-amber-400 hover:text-amber-300 active:scale-95 focus-visible:outline-2 focus-visible:outline-amber-400 sm:flex-1"
-            >
-              <span>Open Mail App</span>
-              <span>↗</span>
-            </a>
           </div>
         </div>
 
-        {/* Verified Social & Technical Links */}
-        <div className="mx-auto flex max-w-lg flex-wrap items-center justify-center gap-2.5 pt-4">
-          <a
-            href={profile.resume}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900/90 px-4 py-2 font-mono text-xs font-semibold text-slate-200 transition hover:border-amber-400 hover:text-amber-300 active:scale-95"
-          >
-            <span>Resume</span>
-            <span>↗</span>
+        <div className="rail-contact__links">
+          <a href={profile.github} target="_blank" rel="noopener noreferrer">
+            <span>GitHub</span><span aria-hidden="true">↗</span>
           </a>
-
-          <a
-            href={profile.github}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900/90 px-4 py-2 font-mono text-xs font-semibold text-slate-200 transition hover:border-amber-400 hover:text-amber-300 active:scale-95"
-          >
-            <span>GitHub</span>
-            <span>↗</span>
+          <a href={profile.linkedin} target="_blank" rel="noopener noreferrer">
+            <span>LinkedIn</span><span aria-hidden="true">↗</span>
           </a>
-
-          <a
-            href={profile.linkedin}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900/90 px-4 py-2 font-mono text-xs font-semibold text-slate-200 transition hover:border-amber-400 hover:text-amber-300 active:scale-95"
-          >
-            <span>LinkedIn</span>
-            <span>↗</span>
-          </a>
-
-          <a
-            href={profile.twitter}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900/90 px-4 py-2 font-mono text-xs font-semibold text-slate-200 transition hover:border-amber-400 hover:text-amber-300 active:scale-95"
-          >
-            <span>X / Twitter</span>
-            <span>↗</span>
+          <a href={`mailto:${profile.email}`}>
+            <span>Email</span><span aria-hidden="true">↗</span>
           </a>
         </div>
 
-        {/* Return to Departure Terminal (Back to Top) */}
-        <div className="pt-8">
-          <button
-            onClick={handleScrollTop}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-slate-800 bg-[#0a0f1d] px-5 py-2.5 font-mono text-xs text-slate-400 hover:border-slate-600 hover:text-amber-400 transition active:scale-95 focus-visible:outline-2 focus-visible:outline-amber-400"
-          >
-            <span>↑ Back to First Stop</span>
-          </button>
+        <div className="rail-contact__secondary">
+          <a href={profile.resume} target="_blank" rel="noopener noreferrer">Resume ↗</a>
+          <a href={profile.twitter} target="_blank" rel="noopener noreferrer">X / Twitter ↗</a>
         </div>
 
-        {/* Technical Footer */}
-        <footer className="pt-10 border-t border-slate-800/80 text-center font-mono text-[11px] text-slate-500 space-y-1">
-          <p>© Harshit Sharma · Subway Editorial Edition</p>
-          <p>Next.js 16 App Router · React 19 · TypeScript · Tailwind CSS 4</p>
+        <button type="button" className="rail-contact__return" onClick={() => scrollToId("hero", 0)}>
+          <span aria-hidden="true">↑</span> RETURN TO DEPARTURE
+        </button>
+
+        <footer className="rail-footer">
+          <span>© Harshit Sharma · Railway Edition</span>
+          <span>Built with Next.js 16 · React 19 · TypeScript · Tailwind CSS 4</span>
+          <span>
+            Night skyline photo:{" "}
+            <a href="https://commons.wikimedia.org/wiki/File:Night_in_San_Francisco_Bay_2016-04-29.jpg" target="_blank" rel="noopener noreferrer">
+              From81 / Wikimedia Commons
+            </a>{" "}
+            · CC BY 3.0
+          </span>
         </footer>
       </Reveal>
     </section>
